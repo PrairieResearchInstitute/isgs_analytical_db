@@ -1,0 +1,14 @@
+# Access databases (large binaries — keep out of version control)
+*.accdb
+*.mdb
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+
+# Claude internal
+.claude/

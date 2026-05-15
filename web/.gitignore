@@ -1,0 +1,15 @@
+node_modules
+.svelte-kit
+build
+dist
+
+# SQLite dev database
+dev.db
+dev.db-journal
+dev.db-wal
+dev.db-shm
+
+# Environment
+.env
+.env.*
+!.env.example
