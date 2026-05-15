@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { projects, lutSiteType, lutCountyNames } from '$lib/server/schema';
-import { eq } from 'drizzle-orm';
+import { eq, or, isNull, gte } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -23,6 +23,7 @@ export const load: PageServerLoad = async () => {
 		.from(projects)
 		.leftJoin(lutSiteType, eq(projects.typeId, lutSiteType.id))
 		.leftJoin(lutCountyNames, eq(projects.county, lutCountyNames.cntycode))
+		.where(or(isNull(projects.endDt), gte(projects.endDt, new Date().toISOString().slice(0, 10))))
 		.orderBy(projects.isgsNum)
 		.all();
 
