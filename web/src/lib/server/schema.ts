@@ -12,3 +12,31 @@ export const sites = sqliteTable('sites', {
 
 export type Site = typeof sites.$inferSelect;
 export type NewSite = typeof sites.$inferInsert;
+
+export const lutSiteType = sqliteTable('lut_site_type', {
+	id: integer('id').primaryKey(),
+	siteType: text('site_type').notNull()
+});
+
+export const lutCountyNames = sqliteTable('lut_county_names', {
+	cntycode: integer('cntycode').primaryKey(),
+	cntyname: text('cntyname')
+});
+
+export const projects = sqliteTable('projects', {
+	id: integer('id').primaryKey(),
+	isgsNum: text('isgs_num'),
+	idotName: text('idot_name'),
+	isgsName: text('isgs_name'),
+	beginDt: text('begin_dt'),
+	endDt: text('end_dt'),
+	faNum: text('fa_num'),
+	county: integer('county').references(() => lutCountyNames.cntycode),
+	typeId: integer('type_id').references(() => lutSiteType.id),
+	seqCode: text('seq_code')
+});
+
+export type LutSiteType = typeof lutSiteType.$inferSelect;
+export type LutCountyName = typeof lutCountyNames.$inferSelect;
+export type Project = typeof projects.$inferSelect;
+export type NewProject = typeof projects.$inferInsert;
