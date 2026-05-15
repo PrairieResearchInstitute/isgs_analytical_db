@@ -5,44 +5,41 @@
 </script>
 
 <svelte:head>
-	<title>Wetlands Sites</title>
+	<title>Wetlands Sites | IDOT Wetlands Data</title>
 </svelte:head>
 
-<div class="max-w-5xl mx-auto">
-	<div class="flex items-center justify-between mb-6">
-		<h2 class="text-2xl font-bold text-gray-900">Wetlands Sites</h2>
-		<span class="text-sm text-gray-500">{data.sites.length} sites</span>
-	</div>
-
-	{#if data.sites.length === 0}
-		<div class="bg-white border border-gray-200 rounded-lg p-12 text-center text-gray-500">
-			No sites yet. Add data via Drizzle Studio (<code>npm run db:studio</code>) or build out the
-			data entry forms.
-		</div>
-	{:else}
-		<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-			<table class="w-full text-sm">
-				<thead class="bg-gray-50 border-b border-gray-200">
-					<tr>
-						<th class="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-						<th class="text-left px-4 py-3 font-medium text-gray-600">Location</th>
-						<th class="text-left px-4 py-3 font-medium text-gray-600">Latitude</th>
-						<th class="text-left px-4 py-3 font-medium text-gray-600">Longitude</th>
-						<th class="text-left px-4 py-3 font-medium text-gray-600">Created</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.sites as site (site.id)}
-						<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-							<td class="px-4 py-3 font-medium text-gray-900">{site.name}</td>
-							<td class="px-4 py-3 text-gray-600">{site.location ?? '—'}</td>
-							<td class="px-4 py-3 text-gray-600 font-mono">{site.latitude ?? '—'}</td>
-							<td class="px-4 py-3 text-gray-600 font-mono">{site.longitude ?? '—'}</td>
-							<td class="px-4 py-3 text-gray-400">{site.createdAt ?? '—'}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	{/if}
+<div class="flex items-center justify-between mb-6">
+	<h1 class="font-heading font-bold text-3xl text-il-blue">Wetlands Sites</h1>
+	<span class="text-sm text-il-storm">{data.sites.length} site{data.sites.length === 1 ? '' : 's'}</span>
 </div>
+
+{#if data.sites.length === 0}
+	<div class="border-2 border-il-cloud rounded p-12 text-center text-il-storm">
+		No sites yet. Add data via Drizzle Studio (<code class="font-mono text-sm bg-il-storm-95 px-1 rounded">npm run db:studio</code>) or build out the data entry forms.
+	</div>
+{:else}
+	<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
+		<table class="w-full text-sm font-sans">
+			<thead class="bg-il-blue text-white">
+				<tr>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Name</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Location</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Latitude</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Longitude</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Created</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each data.sites as site (site.id)}
+					<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
+						<td class="px-4 py-3 font-semibold text-il-blue">{site.name}</td>
+						<td class="px-4 py-3 text-il-storm-30">{site.location ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm-30 font-mono">{site.latitude ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm-30 font-mono">{site.longitude ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm">{site.createdAt ?? '—'}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}

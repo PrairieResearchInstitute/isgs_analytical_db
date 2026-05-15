@@ -1,1 +1,32 @@
 @import 'tailwindcss';
+
+@theme {
+	--color-il-blue: #13294b;
+	--color-il-blue-30: #2f4668;
+	--color-il-blue-darker: #000033;
+	--color-il-orange: #ff5f05;
+	--color-il-altgeld: #c84113;
+	--color-il-storm: #707372;
+	--color-il-storm-30: #474948;
+	--color-il-storm-95: #f4f4f4;
+	--color-il-cloud: #e8e9eb;
+	--font-sans: 'Source Sans', 'Source Sans Pro', Arial, sans-serif;
+	--font-heading: 'Montserrat', Arial Black, sans-serif;
+}
+
+@layer base {
+	body {
+		font-family: var(--font-sans);
+		color: var(--il-storm-10, #252525);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: var(--font-heading);
+		color: var(--il-blue, #13294b);
+	}
+}
