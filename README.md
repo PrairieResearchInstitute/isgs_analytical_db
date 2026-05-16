@@ -33,3 +33,30 @@ dev.db                        # SQLite file (gitignored)
 1. Edit `src/lib/server/schema.ts`
 2. Run `npm run db:push` to apply changes to `dev.db`
 3. Use `npm run db:studio` to inspect the database
+
+## AI development with Claude Code
+
+This project uses the [Svelte Claude plugin](https://svelte.dev/docs/ai/claude-plugin) for accurate Svelte 5 code generation. The plugin connects Claude Code to a remote MCP server with up-to-date Svelte documentation, a specialized Svelte file editor agent, and auto-fix tooling.
+
+### Setup (one time)
+
+In Claude Code, run:
+
+```
+/plugin marketplace add sveltejs/ai-tools
+/plugin install svelte
+```
+
+### How it works
+
+Once installed, Claude Code has access to three MCP tools:
+
+- **`list-sections`** — lists all available Svelte 5 / SvelteKit documentation sections
+- **`get-documentation`** — fetches full documentation for specific sections
+- **`svelte-autofixer`** — analyzes Svelte components and returns issues/suggestions
+
+### Tips
+
+- When creating or editing `.svelte`, `.svelte.ts`, or `.svelte.js` files, Claude will automatically use the plugin to validate code before returning it.
+- For Svelte-specific tasks, the plugin routes work through a dedicated agent (`svelte:svelte-file-editor`) that keeps Svelte concerns out of the main context window, reducing token usage.
+- If you see the autofixer report issues, Claude will keep iterating until it returns clean.
