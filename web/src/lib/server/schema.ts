@@ -36,7 +36,14 @@ export const projects = sqliteTable('projects', {
 	seqCode: text('seq_code')
 });
 
+export const lutcInitials = sqliteTable('lutc_initials', {
+	initials: text('initials').primaryKey(),
+	firstName: text('first_name'),
+	lastName: text('last_name')
+});
+
 export type LutSiteType = typeof lutSiteType.$inferSelect;
 export type LutCountyName = typeof lutCountyNames.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
+export type LutcInitials = typeof lutcInitials.$inferSelect;

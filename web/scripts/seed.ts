@@ -79,3 +79,18 @@ db.insert(schema.projects)
 	.onConflictDoNothing()
 	.run();
 console.log(`Seeded ${projectRows.length} projects`);
+
+// Seed LUTC_Initials
+type RawInitials = { Initials: string; FirstName?: string; LastName?: string };
+const initialsRows = parseNdjson<RawInitials>(`${dataDir}/LUTC_Initials.json`);
+db.insert(schema.lutcInitials)
+	.values(
+		initialsRows.map((r) => ({
+			initials: r.Initials,
+			firstName: r.FirstName ?? null,
+			lastName: r.LastName ?? null
+		}))
+	)
+	.onConflictDoNothing()
+	.run();
+console.log(`Seeded ${initialsRows.length} initials`);
