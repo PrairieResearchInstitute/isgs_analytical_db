@@ -28,6 +28,25 @@ drizzle/                      # Generated migration snapshots
 dev.db                        # SQLite file (gitignored)
 ```
 
+## Pre-commit hooks
+
+Pre-commit hooks run automatically on every `git commit` via [husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged).
+
+**What runs on each commit:**
+- **Prettier** — auto-formats staged `.ts`, `.js`, `.svelte`, `.css`, `.json`, and `.md` files in place
+- **ESLint** — auto-fixes staged `.ts`, `.js`, and `.svelte` files; fails the commit if non-fixable errors remain
+- **svelte-check** — full TypeScript type check across all files; fails the commit on type errors
+
+Hooks are initialized automatically when you run `npm install` (via the `prepare` script). To skip hooks in an emergency: `git commit --no-verify`.
+
+To run the checks manually without committing:
+
+```bash
+npm run lint     # prettier + eslint check
+npm run check    # svelte-check (TypeScript)
+npm run format   # auto-format everything
+```
+
 ## Updating the schema
 
 1. Edit `src/lib/server/schema.ts`
