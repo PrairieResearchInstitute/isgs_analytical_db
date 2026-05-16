@@ -22,7 +22,10 @@
 
 <!-- Top bar -->
 <div class="flex items-center justify-between mb-6">
-	<a href="/" class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors">
+	<a
+		href="/"
+		class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
+	>
 		← Projects
 	</a>
 	<button
@@ -89,13 +92,17 @@
 				<thead class="bg-il-blue text-white">
 					<tr>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
-						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Field Scientist</th>
+						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
+							>Field Scientist</th
+						>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Note</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each data.visits as visit (visit.id)}
-						<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
+						<tr
+							class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
+						>
 							<td class="px-4 py-3 text-il-storm">{visit.dt ?? '—'}</td>
 							<td class="px-4 py-3 font-semibold">
 								<a href="/field_scientist/{visit.by}" class="text-il-blue hover:underline">
@@ -134,12 +141,17 @@
 	<form
 		method="POST"
 		action="?/update"
-		use:enhance={() => ({ update }) => update().then(() => dialog?.close())}
+		use:enhance={() =>
+			({ update }) =>
+				update().then(() => dialog?.close())}
 		class="px-6 py-5 grid grid-cols-2 gap-x-5 gap-y-4"
 	>
 		<!-- ISGS Num -->
 		<div class="flex flex-col gap-1">
-			<label for="isgsNum" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="isgsNum"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				ISGS #
 			</label>
 			<input
@@ -153,7 +165,10 @@
 
 		<!-- IDOT Name -->
 		<div class="flex flex-col gap-1">
-			<label for="idotName" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="idotName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				IDOT Name <span class="text-il-orange">*</span>
 			</label>
 			<input
@@ -168,7 +183,10 @@
 
 		<!-- ISGS Name -->
 		<div class="flex flex-col gap-1">
-			<label for="isgsName" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="isgsName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				ISGS Name
 			</label>
 			<input
@@ -182,7 +200,10 @@
 
 		<!-- FA Number -->
 		<div class="flex flex-col gap-1">
-			<label for="faNum" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="faNum"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				FA #
 			</label>
 			<input
@@ -196,7 +217,10 @@
 
 		<!-- Begin Date -->
 		<div class="flex flex-col gap-1">
-			<label for="beginDt" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="beginDt"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				Begin Date
 			</label>
 			<input
@@ -210,7 +234,10 @@
 
 		<!-- End Date -->
 		<div class="flex flex-col gap-1">
-			<label for="endDt" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="endDt"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				End Date
 			</label>
 			<input
@@ -224,7 +251,10 @@
 
 		<!-- County -->
 		<div class="flex flex-col gap-1">
-			<label for="county" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="county"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				County
 			</label>
 			<select
@@ -242,7 +272,10 @@
 
 		<!-- Site Type -->
 		<div class="flex flex-col gap-1">
-			<label for="typeId" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="typeId"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				Type
 			</label>
 			<select
@@ -260,7 +293,10 @@
 
 		<!-- Seq Code -->
 		<div class="flex flex-col gap-1 col-span-2">
-			<label for="seqCode" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="seqCode"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				Seq Code
 			</label>
 			<input

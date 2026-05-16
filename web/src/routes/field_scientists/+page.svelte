@@ -23,7 +23,9 @@
 <div class="flex items-center justify-between mb-6">
 	<div class="flex items-center gap-3">
 		<h1 class="font-heading font-bold text-3xl text-il-blue">Field Scientists</h1>
-		<span class="inline-flex items-center justify-center rounded-full bg-il-blue text-white text-xs font-semibold font-sans px-2.5 py-0.5 min-w-[1.5rem]">
+		<span
+			class="inline-flex items-center justify-center rounded-full bg-il-blue text-white text-xs font-semibold font-sans px-2.5 py-0.5 min-w-[1.5rem]"
+		>
 			{data.scientists.length}
 		</span>
 	</div>
@@ -90,15 +92,13 @@
 	</div>
 
 	<!-- Create form -->
-	<form
-		method="POST"
-		action="?/create"
-		use:enhance
-		class="px-6 py-5 flex flex-col gap-4"
-	>
+	<form method="POST" action="?/create" use:enhance class="px-6 py-5 flex flex-col gap-4">
 		<!-- Initials -->
 		<div class="flex flex-col gap-1">
-			<label for="initials" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="initials"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				Initials <span class="text-il-orange">*</span>
 			</label>
 			<input
@@ -113,7 +113,10 @@
 
 		<!-- First Name -->
 		<div class="flex flex-col gap-1">
-			<label for="firstName" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="firstName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				First Name
 			</label>
 			<input
@@ -127,7 +130,10 @@
 
 		<!-- Last Name -->
 		<div class="flex flex-col gap-1">
-			<label for="lastName" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="lastName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				Last Name
 			</label>
 			<input

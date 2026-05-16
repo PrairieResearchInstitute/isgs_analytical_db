@@ -1,44 +1,51 @@
 {
-  "name": "idot-wetlands",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "prettier --check . && eslint .",
-    "format": "prettier --write .",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:seed": "npx tsx scripts/seed.ts"
-  },
-  "dependencies": {
-    "better-sqlite3": "^11.10.0",
-    "drizzle-orm": "^0.43.1"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.0.0",
-    "@sveltejs/kit": "^2.0.0",
-    "@sveltejs/vite-plugin-svelte": "^5.0.0",
-    "@tailwindcss/vite": "^4.0.0",
-    "@types/better-sqlite3": "^7.6.13",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "drizzle-kit": "^0.31.1",
-    "eslint": "^9.0.0",
-    "eslint-config-prettier": "^10.0.0",
-    "eslint-plugin-svelte": "^2.43.0",
-    "globals": "^17.6.0",
-    "prettier": "^3.0.0",
-    "prettier-plugin-svelte": "^3.0.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "tailwindcss": "^4.0.0",
-    "typescript": "^5.0.0",
-    "typescript-eslint": "^8.59.3",
-    "vite": "^6.0.0"
-  },
-  "type": "module"
+	"name": "idot-wetlands",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio",
+		"db:seed": "npx tsx scripts/seed.ts",
+		"prepare": "cd .. && husky web/.husky"
+	},
+	"lint-staged": {
+		"*.{ts,js,svelte,css,json,md}": "prettier --write",
+		"*.{ts,js,svelte}": "eslint --fix"
+	},
+	"dependencies": {
+		"better-sqlite3": "^11.10.0",
+		"drizzle-orm": "^0.43.1"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@tailwindcss/vite": "^4.0.0",
+		"@types/better-sqlite3": "^7.6.13",
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
+		"drizzle-kit": "^0.31.1",
+		"eslint": "^9.0.0",
+		"eslint-config-prettier": "^10.0.0",
+		"eslint-plugin-svelte": "^2.43.0",
+		"globals": "^17.6.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^17.0.5",
+		"prettier": "^3.0.0",
+		"prettier-plugin-svelte": "^3.0.0",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"tailwindcss": "^4.0.0",
+		"typescript": "^5.0.0",
+		"typescript-eslint": "^8.59.3",
+		"vite": "^6.0.0"
+	},
+	"type": "module"
 }

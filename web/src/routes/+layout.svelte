@@ -40,17 +40,8 @@
 				</div>
 
 				<!-- Wordmark SVG: hidden below 480px -->
-				<div
-					class="hidden min-[480px]:flex items-center"
-					style="height:51px"
-					aria-hidden="true"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 378.6 10.1"
-						width="253"
-						height="7"
-					>
+				<div class="hidden min-[480px]:flex items-center" style="height:51px" aria-hidden="true">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 378.6 10.1" width="253" height="7">
 						<title>University of Illinois Urbana-Champaign</title>
 						<path
 							fill="#13294B"
@@ -127,8 +118,7 @@
 					<a href="https://illinois.edu/admissions" class="hover:text-white hover:underline"
 						>Admissions</a
 					>
-					<a href="https://illinois.edu/about/news" class="hover:text-white hover:underline"
-						>News</a
+					<a href="https://illinois.edu/about/news" class="hover:text-white hover:underline">News</a
 					>
 					<a href="https://visit.illinois.edu" class="hover:text-white hover:underline"
 						>Visit Campus</a
@@ -145,20 +135,15 @@
 					>
 				</div>
 				<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-					<span
-						>&copy; {new Date().getFullYear()} University of Illinois Board of Trustees</span
+					<span>&copy; {new Date().getFullYear()} University of Illinois Board of Trustees</span>
+					<a href="https://illinois.edu/cookie-policy" class="hover:text-white hover:underline"
+						>Cookie Policy</a
 					>
-					<a
-						href="https://illinois.edu/cookie-policy"
-						class="hover:text-white hover:underline">Cookie Policy</a
+					<a href="https://illinois.edu/privacy-policy" class="hover:text-white hover:underline"
+						>Privacy Policy</a
 					>
-					<a
-						href="https://illinois.edu/privacy-policy"
-						class="hover:text-white hover:underline">Privacy Policy</a
-					>
-					<a
-						href="https://illinois.edu/accessibility"
-						class="hover:text-white hover:underline">Accessibility</a
+					<a href="https://illinois.edu/accessibility" class="hover:text-white hover:underline"
+						>Accessibility</a
 					>
 				</div>
 			</div>

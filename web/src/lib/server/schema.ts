@@ -44,9 +44,13 @@ export const lutcInitials = sqliteTable('lutc_initials', {
 
 export const visits = sqliteTable('visits', {
 	id: integer('id').primaryKey(),
-	projectId: integer('project_id').notNull().references(() => projects.id),
+	projectId: integer('project_id')
+		.notNull()
+		.references(() => projects.id),
 	dt: text('dt'),
-	by: text('by').notNull().references(() => lutcInitials.initials),
+	by: text('by')
+		.notNull()
+		.references(() => lutcInitials.initials),
 	note: text('note'),
 	reviewedBy: text('reviewed_by').references(() => lutcInitials.initials),
 	reviewedDate: text('reviewed_date')

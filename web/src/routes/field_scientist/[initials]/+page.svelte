@@ -17,7 +17,10 @@
 
 <!-- Top bar -->
 <div class="flex items-center justify-between mb-6">
-	<a href="/field_scientists" class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors">
+	<a
+		href="/field_scientists"
+		class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
+	>
 		&larr; Field Scientists
 	</a>
 	<button
@@ -70,7 +73,9 @@
 				</thead>
 				<tbody>
 					{#each data.visits as visit (visit.id)}
-						<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
+						<tr
+							class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
+						>
 							<td class="px-4 py-3 text-il-storm">{visit.dt ?? '—'}</td>
 							<td class="px-4 py-3 font-semibold">
 								<a href="/projects/{visit.projectId}" class="text-il-blue hover:underline">
@@ -109,12 +114,17 @@
 	<form
 		method="POST"
 		action="?/update"
-		use:enhance={() => ({ update }) => update().then(() => dialog?.close())}
+		use:enhance={() =>
+			({ update }) =>
+				update().then(() => dialog?.close())}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
 		<!-- First Name -->
 		<div class="flex flex-col gap-1">
-			<label for="firstName" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="firstName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				First Name
 			</label>
 			<input
@@ -128,7 +138,10 @@
 
 		<!-- Last Name -->
 		<div class="flex flex-col gap-1">
-			<label for="lastName" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
+			<label
+				for="lastName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
 				Last Name
 			</label>
 			<input

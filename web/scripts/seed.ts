@@ -28,9 +28,7 @@ function parseDate(raw: string | undefined | null): string | null {
 const dataDir = resolve(import.meta.dirname, '../../data');
 
 // Seed LUT_SiteType
-const siteTypeRows = parseNdjson<{ ID: number; SiteType: string }>(
-	`${dataDir}/LUT_SiteType.json`
-);
+const siteTypeRows = parseNdjson<{ ID: number; SiteType: string }>(`${dataDir}/LUT_SiteType.json`);
 db.insert(schema.lutSiteType)
 	.values(siteTypeRows.map((r) => ({ id: r.ID, siteType: r.SiteType })))
 	.onConflictDoNothing()
