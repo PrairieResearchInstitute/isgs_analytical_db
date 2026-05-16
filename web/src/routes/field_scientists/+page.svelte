@@ -49,6 +49,7 @@
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Initials</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">First Name</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Last Name</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Visits</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -61,6 +62,7 @@
 						</td>
 						<td class="px-4 py-3 text-il-storm-30">{scientist.firstName ?? '—'}</td>
 						<td class="px-4 py-3 text-il-storm-30">{scientist.lastName ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm">{scientist.visitCount}</td>
 					</tr>
 				{/each}
 			</tbody>

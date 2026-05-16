@@ -58,6 +58,7 @@
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Type</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Begin</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">End</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Visits</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -74,6 +75,7 @@
 						<td class="px-4 py-3 text-il-storm">{project.siteType ?? '—'}</td>
 						<td class="px-4 py-3 text-il-storm">{formatDate(project.beginDt)}</td>
 						<td class="px-4 py-3 text-il-storm">{formatDate(project.endDt)}</td>
+						<td class="px-4 py-3 text-il-storm">{project.visitCount}</td>
 					</tr>
 				{/each}
 			</tbody>
