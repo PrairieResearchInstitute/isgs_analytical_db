@@ -42,8 +42,20 @@ export const lutcInitials = sqliteTable('lutc_initials', {
 	lastName: text('last_name')
 });
 
+export const visits = sqliteTable('visits', {
+	id: integer('id').primaryKey(),
+	projectId: integer('project_id').notNull().references(() => projects.id),
+	dt: text('dt'),
+	by: text('by').notNull().references(() => lutcInitials.initials),
+	note: text('note'),
+	reviewedBy: text('reviewed_by').references(() => lutcInitials.initials),
+	reviewedDate: text('reviewed_date')
+});
+
 export type LutSiteType = typeof lutSiteType.$inferSelect;
 export type LutCountyName = typeof lutCountyNames.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
 export type LutcInitials = typeof lutcInitials.$inferSelect;
+export type Visit = typeof visits.$inferSelect;
+export type NewVisit = typeof visits.$inferInsert;

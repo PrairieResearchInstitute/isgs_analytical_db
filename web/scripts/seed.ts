@@ -94,3 +94,39 @@ db.insert(schema.lutcInitials)
 	.onConflictDoNothing()
 	.run();
 console.log(`Seeded ${initialsRows.length} initials`);
+
+// Seed Visits
+type RawVisit = {
+	ID: number;
+	ProjectID: number;
+	DT: string;
+	By: string;
+	Note?: string;
+	ReviewedBy?: string;
+	ReviewedDate?: string;
+};
+const visitRows = parseNdjson<RawVisit>(`${dataDir}/Visits.json`);
+
+// Ensure all initials referenced by visits exist in lutcInitials
+const referencedInitials = Array.from(
+	new Set(visitRows.flatMap((r) => [r.By, ...(r.ReviewedBy ? [r.ReviewedBy] : [])]))
+);
+db.insert(schema.lutcInitials)
+	.values(referencedInitials.map((i) => ({ initials: i, firstName: null, lastName: null })))
+	.onConflictDoNothing()
+	.run();
+db.insert(schema.visits)
+	.values(
+		visitRows.map((r) => ({
+			id: r.ID,
+			projectId: r.ProjectID,
+			dt: parseDate(r.DT),
+			by: r.By,
+			note: r.Note ?? null,
+			reviewedBy: r.ReviewedBy ?? null,
+			reviewedDate: parseDate(r.ReviewedDate)
+		}))
+	)
+	.onConflictDoNothing()
+	.run();
+console.log(`Seeded ${visitRows.length} visits`);
