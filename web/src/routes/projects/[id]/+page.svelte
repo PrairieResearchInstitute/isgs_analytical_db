@@ -6,10 +6,6 @@
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 
-	function openCreate() {
-		dialog?.showModal();
-	}
-
 	function onDialogClick(e: MouseEvent) {
 		if (e.target === dialog) dialog?.close();
 	}
@@ -21,67 +17,66 @@
 </script>
 
 <svelte:head>
-	<title>Projects | IDOT Wetlands Data</title>
+	<title>{data.project.idotName ?? 'Project'} | IDOT Wetlands Data</title>
 </svelte:head>
 
-<!-- Header bar -->
+<!-- Top bar -->
 <div class="flex items-center justify-between mb-6">
-	<div class="flex items-center gap-3">
-		<h1 class="font-heading font-bold text-3xl text-il-blue">Projects</h1>
-		<span class="inline-flex items-center justify-center rounded-full bg-il-blue text-white text-xs font-semibold font-sans px-2.5 py-0.5 min-w-[1.5rem]">
-			{data.projects.length}
-		</span>
-	</div>
+	<a href="/" class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors">
+		← Projects
+	</a>
 	<button
 		type="button"
-		onclick={openCreate}
+		onclick={() => dialog?.showModal()}
 		class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
 	>
-		+ New Project
+		Edit
 	</button>
 </div>
 
-<!-- Projects table -->
-{#if data.projects.length === 0}
-	<div class="border-2 border-il-cloud rounded p-12 text-center text-il-storm font-sans">
-		No projects yet. Click <strong>+ New Project</strong> to add one.
+<!-- Project detail card -->
+<div class="border border-il-cloud rounded-lg shadow-sm bg-white overflow-hidden">
+	<div class="px-6 py-4 bg-il-storm-95 border-b border-il-cloud">
+		<h1 class="font-heading font-bold text-2xl text-il-blue">{data.project.idotName ?? '—'}</h1>
 	</div>
-{:else}
-	<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
-		<table class="w-full text-sm font-sans">
-			<thead class="bg-il-blue text-white">
-				<tr>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">ISGS #</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">IDOT Name</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">ISGS Name</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">County</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Type</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Begin</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">End</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each data.projects as project (project.id)}
-					<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
-						<td class="px-4 py-3 font-mono text-il-storm-30">{project.isgsNum ?? '—'}</td>
-						<td class="px-4 py-3 font-semibold">
-							<a href="/projects/{project.id}" class="text-il-blue hover:underline">
-								{project.idotName ?? '—'}
-							</a>
-						</td>
-						<td class="px-4 py-3 text-il-storm-30">{project.isgsName ?? '—'}</td>
-						<td class="px-4 py-3 text-il-storm">{project.countyName ?? '—'}</td>
-						<td class="px-4 py-3 text-il-storm">{project.siteType ?? '—'}</td>
-						<td class="px-4 py-3 text-il-storm">{formatDate(project.beginDt)}</td>
-						<td class="px-4 py-3 text-il-storm">{formatDate(project.endDt)}</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
-{/if}
 
-<!-- Create dialog -->
+	<dl class="grid grid-cols-2 gap-x-8 gap-y-5 px-6 py-5 font-sans">
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">ISGS #</dt>
+			<dd class="font-mono text-il-storm-30">{data.project.isgsNum ?? '—'}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">ISGS Name</dt>
+			<dd class="text-il-storm-30">{data.project.isgsName ?? '—'}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">FA #</dt>
+			<dd class="text-il-storm-30">{data.project.faNum ?? '—'}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">County</dt>
+			<dd class="text-il-storm-30">{data.project.countyName ?? '—'}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">Type</dt>
+			<dd class="text-il-storm-30">{data.project.siteType ?? '—'}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">Seq Code</dt>
+			<dd class="text-il-storm-30">{data.project.seqCode ?? '—'}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">Begin Date</dt>
+			<dd class="text-il-storm-30">{formatDate(data.project.beginDt)}</dd>
+		</div>
+		<div>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">End Date</dt>
+			<dd class="text-il-storm-30">{formatDate(data.project.endDt)}</dd>
+		</div>
+	</dl>
+</div>
+
+<!-- Edit dialog -->
 <dialog
 	bind:this={dialog}
 	onclick={onDialogClick}
@@ -89,7 +84,7 @@
 >
 	<!-- Dialog header -->
 	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">New Project</h2>
+		<h2 class="font-heading font-bold text-xl text-il-blue">Edit Project</h2>
 		<button
 			type="button"
 			onclick={() => dialog?.close()}
@@ -100,11 +95,11 @@
 		</button>
 	</div>
 
-	<!-- Create form -->
+	<!-- Edit form -->
 	<form
 		method="POST"
-		action="?/create"
-		use:enhance
+		action="?/update"
+		use:enhance={() => ({ update }) => update().then(() => dialog?.close())}
 		class="px-6 py-5 grid grid-cols-2 gap-x-5 gap-y-4"
 	>
 		<!-- ISGS Num -->
@@ -116,7 +111,7 @@
 				id="isgsNum"
 				name="isgsNum"
 				type="text"
-				value={''}
+				value={data.project.isgsNum ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -131,7 +126,7 @@
 				name="idotName"
 				type="text"
 				required
-				value={''}
+				value={data.project.idotName ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -145,7 +140,7 @@
 				id="isgsName"
 				name="isgsName"
 				type="text"
-				value={''}
+				value={data.project.isgsName ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -159,7 +154,7 @@
 				id="faNum"
 				name="faNum"
 				type="text"
-				value={''}
+				value={data.project.faNum ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -173,7 +168,7 @@
 				id="beginDt"
 				name="beginDt"
 				type="date"
-				value={''}
+				value={data.project.beginDt ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -187,7 +182,7 @@
 				id="endDt"
 				name="endDt"
 				type="date"
-				value={''}
+				value={data.project.endDt ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -200,7 +195,7 @@
 			<select
 				id="county"
 				name="county"
-				value={''}
+				value={data.project.county ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			>
 				<option value="">— Select county —</option>
@@ -218,7 +213,7 @@
 			<select
 				id="typeId"
 				name="typeId"
-				value={''}
+				value={data.project.typeId ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			>
 				<option value="">— Select type —</option>
@@ -237,7 +232,7 @@
 				id="seqCode"
 				name="seqCode"
 				type="text"
-				value={''}
+				value={data.project.seqCode ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -255,9 +250,23 @@
 				type="submit"
 				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
 			>
-				Create Project
+				Save Changes
 			</button>
 		</div>
 	</form>
 
+	<!-- Delete form -->
+	<div class="px-6 pb-5">
+		<form method="POST" action="?/delete" use:enhance>
+			<button
+				type="submit"
+				class="text-sm font-sans font-semibold text-red-600 hover:text-red-800 underline transition-colors"
+				onclick={(e) => {
+					if (!confirm('Delete this project? This cannot be undone.')) e.preventDefault();
+				}}
+			>
+				Delete Project
+			</button>
+		</form>
+	</div>
 </dialog>
