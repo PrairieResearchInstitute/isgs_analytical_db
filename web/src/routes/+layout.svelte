@@ -1,8 +1,14 @@
 <script lang="ts">
 	import '../app.css';
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/stores';
 
 	let { children }: { children: Snippet } = $props();
+
+	let pathname = $derived($page.url.pathname);
+
+	let projectsActive = $derived(pathname === '/' || pathname.startsWith('/projects'));
+	let scientistsActive = $derived(pathname.startsWith('/field_scientist'));
 </script>
 
 <div class="min-h-screen flex flex-col bg-white">
@@ -56,7 +62,7 @@
 		</div>
 
 		<!-- Site name -->
-		<div class="px-8 pb-5">
+		<div class="px-8 pb-2">
 			<a
 				href="/"
 				class="font-heading font-bold text-2xl text-il-blue no-underline hover:underline hover:text-il-altgeld"
@@ -64,6 +70,28 @@
 				IDOT Wetlands Data
 			</a>
 		</div>
+
+		<!-- Navigation -->
+		<nav class="border-t border-il-cloud">
+			<div class="px-8 flex gap-0">
+				<a
+					href="/"
+					class="px-4 py-2.5 text-sm font-sans font-semibold border-b-2 transition-colors {projectsActive
+						? 'border-il-orange text-il-blue'
+						: 'border-transparent text-il-storm hover:text-il-blue'}"
+				>
+					Projects
+				</a>
+				<a
+					href="/field_scientists"
+					class="px-4 py-2.5 text-sm font-sans font-semibold border-b-2 transition-colors {scientistsActive
+						? 'border-il-orange text-il-blue'
+						: 'border-transparent text-il-storm hover:text-il-blue'}"
+				>
+					Field Scientists
+				</a>
+			</div>
+		</nav>
 	</header>
 
 	<!-- Page content -->
