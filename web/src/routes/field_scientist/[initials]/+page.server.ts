@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { lutcInitials } from '$lib/server/schema';
+import { lutcInitials, visits, projects } from '$lib/server/schema';
 import { eq } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -12,7 +12,22 @@ export const load: PageServerLoad = async ({ params }) => {
 		.get();
 
 	if (!row) error(404, 'Field scientist not found');
-	return { scientist: row };
+
+	const scientistVisits = db
+		.select({
+			id: visits.id,
+			dt: visits.dt,
+			projectId: visits.projectId,
+			idotName: projects.idotName,
+			note: visits.note
+		})
+		.from(visits)
+		.leftJoin(projects, eq(visits.projectId, projects.id))
+		.where(eq(visits.by, params.initials))
+		.orderBy(visits.dt)
+		.all();
+
+	return { scientist: row, visits: scientistVisits };
 };
 
 export const actions: Actions = {

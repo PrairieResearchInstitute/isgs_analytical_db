@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { projects, lutSiteType, lutCountyNames } from '$lib/server/schema';
+import { projects, lutSiteType, lutCountyNames, visits, lutcInitials } from '$lib/server/schema';
 import { eq } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -34,7 +34,22 @@ export const load: PageServerLoad = async ({ params }) => {
 	const siteTypes = db.select().from(lutSiteType).orderBy(lutSiteType.siteType).all();
 	const counties = db.select().from(lutCountyNames).orderBy(lutCountyNames.cntyname).all();
 
-	return { project: rows[0], siteTypes, counties };
+	const projectVisits = db
+		.select({
+			id: visits.id,
+			dt: visits.dt,
+			by: visits.by,
+			firstName: lutcInitials.firstName,
+			lastName: lutcInitials.lastName,
+			note: visits.note
+		})
+		.from(visits)
+		.leftJoin(lutcInitials, eq(visits.by, lutcInitials.initials))
+		.where(eq(visits.projectId, id))
+		.orderBy(visits.dt)
+		.all();
+
+	return { project: rows[0], siteTypes, counties, visits: projectVisits };
 };
 
 export const actions: Actions = {

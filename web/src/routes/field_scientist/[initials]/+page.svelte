@@ -51,6 +51,41 @@
 	</dl>
 </div>
 
+<!-- Visits table -->
+<div class="mt-8">
+	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Visits</h2>
+	{#if data.visits.length === 0}
+		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
+			No visits recorded for this scientist.
+		</div>
+	{:else}
+		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
+			<table class="w-full text-sm font-sans">
+				<thead class="bg-il-blue text-white">
+					<tr>
+						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
+						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">IDOT Name</th>
+						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Note</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each data.visits as visit (visit.id)}
+						<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
+							<td class="px-4 py-3 text-il-storm">{visit.dt ?? '—'}</td>
+							<td class="px-4 py-3 font-semibold">
+								<a href="/projects/{visit.projectId}" class="text-il-blue hover:underline">
+									{visit.idotName ?? '—'}
+								</a>
+							</td>
+							<td class="px-4 py-3 text-il-storm-30">{visit.note ?? '—'}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{/if}
+</div>
+
 <!-- Edit dialog -->
 <dialog
 	bind:this={dialog}
