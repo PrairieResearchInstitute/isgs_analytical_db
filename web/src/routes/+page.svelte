@@ -18,6 +18,48 @@
 		if (!val) return '—';
 		return val;
 	}
+
+	type SortKey =
+		| 'isgsNum'
+		| 'idotName'
+		| 'isgsName'
+		| 'countyName'
+		| 'siteType'
+		| 'beginDt'
+		| 'endDt'
+		| 'visitCount';
+
+	let sortKey = $state<SortKey>('isgsNum');
+	let sortDir = $state<'asc' | 'desc'>('asc');
+
+	function toggleSort(key: SortKey) {
+		if (sortKey === key) {
+			sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortKey = key;
+			sortDir = 'asc';
+		}
+	}
+
+	function sortIcon(key: SortKey): string {
+		if (sortKey !== key) return '↕';
+		return sortDir === 'asc' ? '↑' : '↓';
+	}
+
+	const sortedProjects = $derived(
+		[...data.projects].sort((a, b) => {
+			const av = a[sortKey];
+			const bv = b[sortKey];
+			if (av == null && bv == null) return 0;
+			if (av == null) return 1;
+			if (bv == null) return -1;
+			const cmp =
+				typeof av === 'number' && typeof bv === 'number'
+					? av - bv
+					: String(av).localeCompare(String(bv));
+			return sortDir === 'asc' ? cmp : -cmp;
+		})
+	);
 </script>
 
 <svelte:head>
@@ -53,18 +95,82 @@
 		<table class="w-full text-sm font-sans">
 			<thead class="bg-il-blue text-white">
 				<tr>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">ISGS #</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">IDOT Name</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">ISGS Name</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">County</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Type</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Begin</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">End</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Visits</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('isgsNum')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							ISGS # <span class="text-xs opacity-70">{sortIcon('isgsNum')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('idotName')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							IDOT Name <span class="text-xs opacity-70">{sortIcon('idotName')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('isgsName')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							ISGS Name <span class="text-xs opacity-70">{sortIcon('isgsName')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('countyName')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							County <span class="text-xs opacity-70">{sortIcon('countyName')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('siteType')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							Type <span class="text-xs opacity-70">{sortIcon('siteType')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('beginDt')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							Begin <span class="text-xs opacity-70">{sortIcon('beginDt')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('endDt')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							End <span class="text-xs opacity-70">{sortIcon('endDt')}</span>
+						</button>
+					</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
+						<button
+							type="button"
+							onclick={() => toggleSort('visitCount')}
+							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
+						>
+							Visits <span class="text-xs opacity-70">{sortIcon('visitCount')}</span>
+						</button>
+					</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.projects as project (project.id)}
+				{#each sortedProjects as project (project.id)}
 					<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
 						<td class="px-4 py-3 font-mono text-il-storm-30">{project.isgsNum ?? '—'}</td>
 						<td class="px-4 py-3 font-semibold">
