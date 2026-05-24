@@ -191,7 +191,7 @@
 						>
 							<td class="px-4 py-3 text-il-storm">{visit.dt ?? '—'}</td>
 							<td class="px-4 py-3 font-semibold">
-								<a href="/field_scientist/{visit.by}" class="text-il-blue hover:underline">
+								<a href="/maintenance/people/{visit.by}" class="text-il-blue hover:underline">
 									{[visit.firstName, visit.lastName].filter(Boolean).join(' ') || visit.by || '—'}
 								</a>
 							</td>

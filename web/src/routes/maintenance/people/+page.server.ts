@@ -34,6 +34,6 @@ export const actions: Actions = {
 			})
 			.run();
 
-		redirect(303, '/field_scientists');
+		redirect(303, '/maintenance/people');
 	}
 };

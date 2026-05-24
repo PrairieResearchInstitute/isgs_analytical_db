@@ -8,7 +8,7 @@
 	let pathname = $derived($page.url.pathname);
 
 	let projectsActive = $derived(pathname === '/' || pathname.startsWith('/projects'));
-	let scientistsActive = $derived(pathname.startsWith('/field_scientist'));
+	let maintenanceActive = $derived(pathname.startsWith('/maintenance'));
 </script>
 
 <div class="min-h-screen flex flex-col bg-white">
@@ -74,12 +74,12 @@
 					Projects
 				</a>
 				<a
-					href="/field_scientists"
-					class="px-4 py-2.5 text-sm font-sans font-semibold border-b-2 transition-colors {scientistsActive
+					href="/maintenance/people"
+					class="px-4 py-2.5 text-sm font-sans font-semibold border-b-2 transition-colors {maintenanceActive
 						? 'border-il-orange text-il-blue'
 						: 'border-transparent text-il-storm hover:text-il-blue'}"
 				>
-					Field Scientists
+					Maintenance
 				</a>
 			</div>
 		</nav>

@@ -18,10 +18,10 @@
 <!-- Top bar -->
 <div class="flex items-center justify-between mb-6">
 	<a
-		href="/field_scientists"
+		href="/maintenance/people"
 		class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
 	>
-		&larr; Field Scientists
+		&larr; People
 	</a>
 	<button
 		type="button"
@@ -32,7 +32,7 @@
 	</button>
 </div>
 
-<!-- Field Scientist detail card -->
+<!-- Person detail card -->
 <div class="border border-il-cloud rounded-lg shadow-sm bg-white overflow-hidden">
 	<div class="px-6 py-4 bg-il-storm-95 border-b border-il-cloud">
 		<h1 class="font-heading font-bold text-2xl text-il-blue">{data.scientist.initials}</h1>
@@ -59,7 +59,7 @@
 	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Visits</h2>
 	{#if data.visits.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
-			No visits recorded for this scientist.
+			No visits recorded for this person.
 		</div>
 	{:else}
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
@@ -99,7 +99,7 @@
 >
 	<!-- Dialog header -->
 	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">Edit Field Scientist</h2>
+		<h2 class="font-heading font-bold text-xl text-il-blue">Edit Person</h2>
 		<button
 			type="button"
 			onclick={() => dialog?.close()}
@@ -178,10 +178,10 @@
 				type="submit"
 				class="text-sm font-sans font-semibold text-red-600 hover:text-red-800 underline transition-colors"
 				onclick={(e) => {
-					if (!confirm('Delete this field scientist? This cannot be undone.')) e.preventDefault();
+					if (!confirm('Delete this person? This cannot be undone.')) e.preventDefault();
 				}}
 			>
-				Delete Field Scientist
+				Delete Person
 			</button>
 		</form>
 	</div>

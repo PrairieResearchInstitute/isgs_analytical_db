@@ -16,13 +16,13 @@
 </script>
 
 <svelte:head>
-	<title>Field Scientists | IDOT Wetlands Data</title>
+	<title>People | IDOT Wetlands Data</title>
 </svelte:head>
 
 <!-- Header bar -->
 <div class="flex items-center justify-between mb-6">
 	<div class="flex items-center gap-3">
-		<h1 class="font-heading font-bold text-3xl text-il-blue">Field Scientists</h1>
+		<h1 class="font-heading font-bold text-3xl text-il-blue">People</h1>
 		<span
 			class="inline-flex items-center justify-center rounded-full bg-il-blue text-white text-xs font-semibold font-sans px-2.5 py-0.5 min-w-[1.5rem]"
 		>
@@ -34,14 +34,14 @@
 		onclick={openCreate}
 		class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
 	>
-		+ New Field Scientist
+		+ New Person
 	</button>
 </div>
 
-<!-- Field Scientists table -->
+<!-- People table -->
 {#if data.scientists.length === 0}
 	<div class="border-2 border-il-cloud rounded p-12 text-center text-il-storm font-sans">
-		No field scientists yet. Click <strong>+ New Field Scientist</strong> to add one.
+		No people yet. Click <strong>+ New Person</strong> to add one.
 	</div>
 {:else}
 	<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
@@ -58,7 +58,10 @@
 				{#each data.scientists as scientist (scientist.initials)}
 					<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
 						<td class="px-4 py-3 font-mono font-semibold">
-							<a href="/field_scientist/{scientist.initials}" class="text-il-blue hover:underline">
+							<a
+								href="/maintenance/people/{scientist.initials}"
+								class="text-il-blue hover:underline"
+							>
 								{scientist.initials}
 							</a>
 						</td>
@@ -80,7 +83,7 @@
 >
 	<!-- Dialog header -->
 	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">New Field Scientist</h2>
+		<h2 class="font-heading font-bold text-xl text-il-blue">New Person</h2>
 		<button
 			type="button"
 			onclick={() => dialog?.close()}
@@ -158,7 +161,7 @@
 				type="submit"
 				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
 			>
-				Create Field Scientist
+				Create Person
 			</button>
 		</div>
 	</form>

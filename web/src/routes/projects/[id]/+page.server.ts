@@ -13,7 +13,7 @@ import {
 	lutStationReadType,
 	lutBoringMethod
 } from '$lib/server/schema';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -59,7 +59,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.from(visits)
 		.leftJoin(lutcInitials, eq(visits.by, lutcInitials.initials))
 		.where(eq(visits.projectId, id))
-		.orderBy(visits.dt)
+		.orderBy(desc(visits.dt))
 		.all();
 
 	const projectStations = db

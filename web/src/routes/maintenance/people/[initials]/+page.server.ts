@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.where(eq(lutcInitials.initials, params.initials))
 		.get();
 
-	if (!row) error(404, 'Field scientist not found');
+	if (!row) error(404, 'Person not found');
 
 	const scientistVisits = db
 		.select({
@@ -42,11 +42,11 @@ export const actions: Actions = {
 			.where(eq(lutcInitials.initials, params.initials))
 			.run();
 
-		redirect(303, `/field_scientist/${params.initials}`);
+		redirect(303, `/maintenance/people/${params.initials}`);
 	},
 
 	delete: async ({ params }) => {
 		db.delete(lutcInitials).where(eq(lutcInitials.initials, params.initials)).run();
-		redirect(303, '/field_scientists');
+		redirect(303, '/maintenance/people');
 	}
 };
