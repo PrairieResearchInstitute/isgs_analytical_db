@@ -280,7 +280,7 @@ async function main() {
 	await db.execute(sql`SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects))`);
 	await db.execute(sql`SELECT setval('visits_id_seq', (SELECT MAX(id) FROM visits))`);
 	await db.execute(sql`SELECT setval('stations_id_seq', (SELECT MAX(id) FROM stations))`);
-	await db.execute(sql`SELECT setval('sites_id_seq', COALESCE((SELECT MAX(id) FROM sites), 0))`);
+	await db.execute(sql`SELECT setval('sites_id_seq', COALESCE((SELECT MAX(id) FROM sites), 1))`);
 	console.log('Sequences synced');
 
 	await client.end();

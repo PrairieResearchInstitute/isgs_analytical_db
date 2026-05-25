@@ -1,31 +1,77 @@
 # IDOT Wetlands Data — Web App
 
-SvelteKit app for managing wetlands data collection. Uses SQLite (`dev.db`) via Drizzle ORM for local development.
+SvelteKit app for managing wetlands data collection. Uses PostgreSQL via Drizzle ORM.
 
-## Running
+## Quick start (Docker)
+
+```bash
+docker compose up --build
+```
+
+This builds both images, starts PostgreSQL, runs the seed job (schema push + data load), then starts the web app at http://localhost:3000.
+
+PostgreSQL is exposed on the host at `localhost:5432` so you can connect with any client:
+
+```
+postgresql://idot:idot@localhost:5432/idot
+```
+
+If port 5432 is already in use, override it:
+
+```bash
+POSTGRES_HOST_PORT=5499 docker compose up --build
+```
+
+To re-seed without rebuilding (seed is idempotent):
+
+```bash
+docker compose run --rm seed
+```
+
+## Local development against the Docker database
+
+Start just the database, then run the SvelteKit dev server on the host:
+
+```bash
+docker compose up postgres -d
+
+cd web
+DATABASE_URL=postgresql://idot:idot@localhost:5432/idot npm run dev   # http://localhost:5173
+```
+
+Add the URL to `web/.env` (gitignored) to avoid typing it every time:
+
+```
+DATABASE_URL=postgresql://idot:idot@localhost:5432/idot
+```
+
+Then the standard dev commands work without any prefix:
 
 ```bash
 npm run dev          # http://localhost:5173
-npm run db:studio    # Drizzle Studio to inspect/add data
+npm run db:studio    # Drizzle Studio connected to the Docker postgres
 npm run db:push      # Apply schema changes after editing schema.ts
 ```
 
 ## Project structure
 
 ```
-src/
-  app.html                    # HTML shell
-  app.css                     # Tailwind v4 import
-  lib/server/
-    db.ts                     # SQLite + Drizzle singleton
-    schema.ts                 # Database schema (edit this to add tables/columns)
-  routes/
-    +layout.svelte            # App shell with header
-    +page.server.ts           # Loads sites from DB
-    +page.svelte              # Sites table UI
-drizzle.config.ts             # Points to dev.db
-drizzle/                      # Generated migration snapshots
-dev.db                        # SQLite file (gitignored)
+docker-compose.yml            # postgres + seed + web services
+data/                         # NDJSON seed files
+web/
+  src/
+    app.html                  # HTML shell
+    app.css                   # Tailwind v4 import
+    lib/server/
+      db.ts                   # Drizzle + postgres-js singleton (reads DATABASE_URL)
+      schema.ts               # Database schema (edit this to add tables/columns)
+    routes/
+      +layout.svelte          # App shell with header
+      +page.server.ts         # Loads projects from DB
+      +page.svelte            # Projects table UI
+  scripts/
+    seed.ts                   # Loads data/ files into postgres
+  drizzle.config.ts           # Points to DATABASE_URL
 ```
 
 ## Pre-commit hooks
@@ -49,8 +95,8 @@ npm run format   # auto-format everything
 
 ## Updating the schema
 
-1. Edit `src/lib/server/schema.ts`
-2. Run `npm run db:push` to apply changes to `dev.db`
+1. Edit `web/src/lib/server/schema.ts`
+2. Run `npm run db:push` to apply changes to the database
 3. Use `npm run db:studio` to inspect the database
 
 ## AI development with Claude Code
