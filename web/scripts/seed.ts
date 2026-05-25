@@ -1,12 +1,15 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { sql } from 'drizzle-orm';
 import * as schema from '../src/lib/server/schema.js';
 
-const sqlite = new Database(resolve(import.meta.dirname, '../dev.db'));
-sqlite.pragma('journal_mode = WAL');
-const db = drizzle(sqlite, { schema });
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error('DATABASE_URL is not set');
+
+const client = postgres(connectionString);
+const db = drizzle(client, { schema });
 
 function parseNdjson<T>(filePath: string): T[] {
 	return readFileSync(filePath, 'utf-8')
@@ -33,237 +36,257 @@ function parseDate(raw: string | undefined | null): string | null {
 
 const dataDir = resolve(import.meta.dirname, '../../data');
 
-// Seed LUT_SiteType
-const siteTypeRows = parseNdjson<{ ID: number; SiteType: string }>(`${dataDir}/LUT_SiteType.json`);
-db.insert(schema.lutSiteType)
-	.values(siteTypeRows.map((r) => ({ id: r.ID, siteType: r.SiteType })))
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${siteTypeRows.length} site types`);
+async function main() {
+	// Seed LUT_SiteType
+	const siteTypeRows = parseNdjson<{ ID: number; SiteType: string }>(
+		`${dataDir}/LUT_SiteType.json`
+	);
+	await db
+		.insert(schema.lutSiteType)
+		.values(siteTypeRows.map((r) => ({ id: r.ID, siteType: r.SiteType })))
+		.onConflictDoNothing();
+	console.log(`Seeded ${siteTypeRows.length} site types`);
 
-// Seed LUT_County_Names
-const countyRows = parseNdjson<{ CNTYCODE: number; CNTYNAME: string }>(
-	`${dataDir}/LUT_County_Names.json`
-);
-db.insert(schema.lutCountyNames)
-	.values(countyRows.map((r) => ({ cntycode: r.CNTYCODE, cntyname: r.CNTYNAME })))
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${countyRows.length} county names`);
+	// Seed LUT_County_Names
+	const countyRows = parseNdjson<{ CNTYCODE: number; CNTYNAME: string }>(
+		`${dataDir}/LUT_County_Names.json`
+	);
+	await db
+		.insert(schema.lutCountyNames)
+		.values(countyRows.map((r) => ({ cntycode: r.CNTYCODE, cntyname: r.CNTYNAME })))
+		.onConflictDoNothing();
+	console.log(`Seeded ${countyRows.length} county names`);
 
-// Seed Projects
-type RawProject = {
-	ID: number;
-	ISGS_Num?: string;
-	IDOT_Name?: string;
-	ISGS_Name?: string;
-	BeginDT?: string;
-	EndDT?: string;
-	FA_num?: string;
-	County?: string;
-	TypeID?: number;
-	SeqCode?: string;
-};
-const projectRows = parseNdjson<RawProject>(`${dataDir}/Projects.json`);
-db.insert(schema.projects)
-	.values(
-		projectRows.map((r) => ({
-			id: r.ID,
-			isgsNum: r.ISGS_Num ?? null,
-			idotName: r.IDOT_Name ?? null,
-			isgsName: r.ISGS_Name ?? null,
-			beginDt: parseDate(r.BeginDT),
-			endDt: parseDate(r.EndDT),
-			faNum: r.FA_num ?? null,
-			county: r.County ? parseInt(r.County) : null,
-			typeId: r.TypeID ?? null,
-			seqCode: r.SeqCode ?? null
-		}))
-	)
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${projectRows.length} projects`);
+	// Seed Projects
+	type RawProject = {
+		ID: number;
+		ISGS_Num?: string;
+		IDOT_Name?: string;
+		ISGS_Name?: string;
+		BeginDT?: string;
+		EndDT?: string;
+		FA_num?: string;
+		County?: string;
+		TypeID?: number;
+		SeqCode?: string;
+	};
+	const projectRows = parseNdjson<RawProject>(`${dataDir}/Projects.json`);
+	await db
+		.insert(schema.projects)
+		.values(
+			projectRows.map((r) => ({
+				id: r.ID,
+				isgsNum: r.ISGS_Num ?? null,
+				idotName: r.IDOT_Name ?? null,
+				isgsName: r.ISGS_Name ?? null,
+				beginDt: parseDate(r.BeginDT),
+				endDt: parseDate(r.EndDT),
+				faNum: r.FA_num ?? null,
+				county: r.County ? parseInt(r.County) : null,
+				typeId: r.TypeID ?? null,
+				seqCode: r.SeqCode ?? null
+			}))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${projectRows.length} projects`);
 
-// Seed LUTC_Initials
-type RawInitials = { Initials: string; FirstName?: string; LastName?: string };
-const initialsRows = parseNdjson<RawInitials>(`${dataDir}/LUTC_Initials.json`);
-db.insert(schema.lutcInitials)
-	.values(
-		initialsRows.map((r) => ({
-			initials: r.Initials,
-			firstName: r.FirstName ?? null,
-			lastName: r.LastName ?? null
-		}))
-	)
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${initialsRows.length} initials`);
+	// Seed LUTC_Initials
+	type RawInitials = { Initials: string; FirstName?: string; LastName?: string };
+	const initialsRows = parseNdjson<RawInitials>(`${dataDir}/LUTC_Initials.json`);
+	await db
+		.insert(schema.lutcInitials)
+		.values(
+			initialsRows.map((r) => ({
+				initials: r.Initials,
+				firstName: r.FirstName ?? null,
+				lastName: r.LastName ?? null
+			}))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${initialsRows.length} initials`);
 
-// Seed Visits
-type RawVisit = {
-	ID: number;
-	ProjectID: number;
-	DT: string;
-	By: string;
-	Note?: string;
-	ReviewedBy?: string;
-	ReviewedDate?: string;
-};
-const visitRows = parseNdjson<RawVisit>(`${dataDir}/Visits.json`);
+	// Seed Visits
+	type RawVisit = {
+		ID: number;
+		ProjectID: number;
+		DT: string;
+		By: string;
+		Note?: string;
+		ReviewedBy?: string;
+		ReviewedDate?: string;
+	};
+	const visitRows = parseNdjson<RawVisit>(`${dataDir}/Visits.json`);
 
-// Ensure all initials referenced by visits exist in lutcInitials
-const referencedInitials = Array.from(
-	new Set(visitRows.flatMap((r) => [r.By, ...(r.ReviewedBy ? [r.ReviewedBy] : [])]))
-);
-db.insert(schema.lutcInitials)
-	.values(referencedInitials.map((i) => ({ initials: i, firstName: null, lastName: null })))
-	.onConflictDoNothing()
-	.run();
-db.insert(schema.visits)
-	.values(
-		visitRows.map((r) => ({
-			id: r.ID,
-			projectId: r.ProjectID,
-			dt: parseDate(r.DT),
-			by: r.By,
-			note: r.Note ?? null,
-			reviewedBy: r.ReviewedBy ?? null,
-			reviewedDate: parseDate(r.ReviewedDate)
-		}))
-	)
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${visitRows.length} visits`);
+	// Ensure all initials referenced by visits exist in lutcInitials
+	const referencedInitials = Array.from(
+		new Set(visitRows.flatMap((r) => [r.By, ...(r.ReviewedBy ? [r.ReviewedBy] : [])]))
+	);
+	await db
+		.insert(schema.lutcInitials)
+		.values(referencedInitials.map((i) => ({ initials: i, firstName: null, lastName: null })))
+		.onConflictDoNothing();
+	await db
+		.insert(schema.visits)
+		.values(
+			visitRows.map((r) => ({
+				id: r.ID,
+				projectId: r.ProjectID,
+				dt: parseDate(r.DT),
+				by: r.By,
+				note: r.Note ?? null,
+				reviewedBy: r.ReviewedBy ?? null,
+				reviewedDate: parseDate(r.ReviewedDate)
+			}))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${visitRows.length} visits`);
 
-// Seed LUT_Station_Type
-type RawStationType = { ID: number; Type: string; ShortType?: string };
-const stationTypeRows = parseNdjson<RawStationType>(`${dataDir}/LUT_Station_Type.json`);
-db.insert(schema.lutStationType)
-	.values(stationTypeRows.map((r) => ({ id: r.ID, type: r.Type, shortType: r.ShortType ?? null })))
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${stationTypeRows.length} station types`);
+	// Seed LUT_Station_Type
+	type RawStationType = { ID: number; Type: string; ShortType?: string };
+	const stationTypeRows = parseNdjson<RawStationType>(`${dataDir}/LUT_Station_Type.json`);
+	await db
+		.insert(schema.lutStationType)
+		.values(
+			stationTypeRows.map((r) => ({ id: r.ID, type: r.Type, shortType: r.ShortType ?? null }))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${stationTypeRows.length} station types`);
 
-// Seed LUT_LocationType
-type RawLocationType = { ID: number; LocationType: string };
-const locationTypeRows = parseNdjson<RawLocationType>(`${dataDir}/LUT_LocationType.json`);
-db.insert(schema.lutLocationType)
-	.values(locationTypeRows.map((r) => ({ id: r.ID, locationType: r.LocationType })))
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${locationTypeRows.length} location types`);
+	// Seed LUT_LocationType
+	type RawLocationType = { ID: number; LocationType: string };
+	const locationTypeRows = parseNdjson<RawLocationType>(`${dataDir}/LUT_LocationType.json`);
+	await db
+		.insert(schema.lutLocationType)
+		.values(locationTypeRows.map((r) => ({ id: r.ID, locationType: r.LocationType })))
+		.onConflictDoNothing();
+	console.log(`Seeded ${locationTypeRows.length} location types`);
 
-// Seed LUT_Station_InstType
-type RawInstType = { ID: number; InstType: string; WLE_Equation?: string };
-const instTypeRows = parseNdjson<RawInstType>(`${dataDir}/LUT_Station_InstType.json`);
-db.insert(schema.lutStationInstType)
-	.values(
-		instTypeRows.map((r) => ({
-			id: r.ID,
-			instType: r.InstType,
-			wleEquation: r.WLE_Equation ?? null
-		}))
-	)
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${instTypeRows.length} instrument types`);
+	// Seed LUT_Station_InstType
+	type RawInstType = { ID: number; InstType: string; WLE_Equation?: string };
+	const instTypeRows = parseNdjson<RawInstType>(`${dataDir}/LUT_Station_InstType.json`);
+	await db
+		.insert(schema.lutStationInstType)
+		.values(
+			instTypeRows.map((r) => ({
+				id: r.ID,
+				instType: r.InstType,
+				wleEquation: r.WLE_Equation ?? null
+			}))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${instTypeRows.length} instrument types`);
 
-// Seed LUT_Station_Units
-type RawStationUnits = { ID: number; Units_Reading: string; Conv_Factor?: number };
-const stationUnitsRows = parseNdjson<RawStationUnits>(`${dataDir}/LUT_Station_Units.json`);
-db.insert(schema.lutStationUnits)
-	.values(
-		stationUnitsRows.map((r) => ({
-			id: r.ID,
-			unitsReading: r.Units_Reading,
-			convFactor: r.Conv_Factor ?? null
-		}))
-	)
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${stationUnitsRows.length} station units`);
+	// Seed LUT_Station_Units
+	type RawStationUnits = { ID: number; Units_Reading: string; Conv_Factor?: number };
+	const stationUnitsRows = parseNdjson<RawStationUnits>(`${dataDir}/LUT_Station_Units.json`);
+	await db
+		.insert(schema.lutStationUnits)
+		.values(
+			stationUnitsRows.map((r) => ({
+				id: r.ID,
+				unitsReading: r.Units_Reading,
+				convFactor: r.Conv_Factor ?? null
+			}))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${stationUnitsRows.length} station units`);
 
-// Seed LUT_Station_ReadType
-type RawReadType = {
-	ID: number;
-	LoggerType: string;
-	ReadType: string;
-	IDRT: number;
-	LoggerTypeShort?: string;
-	IsWQ: number;
-	SortOrder?: number;
-};
-const readTypeRows = parseNdjson<RawReadType>(`${dataDir}/LUT_Station_ReadType.json`);
-db.insert(schema.lutStationReadType)
-	.values(
-		readTypeRows.map((r) => ({
-			id: r.ID,
-			loggerType: r.LoggerType,
-			readType: r.ReadType,
-			idrt: r.IDRT,
-			loggerTypeShort: r.LoggerTypeShort ?? null,
-			isWQ: r.IsWQ,
-			sortOrder: r.SortOrder ?? null
-		}))
-	)
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${readTypeRows.length} read types`);
+	// Seed LUT_Station_ReadType
+	type RawReadType = {
+		ID: number;
+		LoggerType: string;
+		ReadType: string;
+		IDRT: number;
+		LoggerTypeShort?: string;
+		IsWQ: number;
+		SortOrder?: number;
+	};
+	const readTypeRows = parseNdjson<RawReadType>(`${dataDir}/LUT_Station_ReadType.json`);
+	await db
+		.insert(schema.lutStationReadType)
+		.values(
+			readTypeRows.map((r) => ({
+				id: r.ID,
+				loggerType: r.LoggerType,
+				readType: r.ReadType,
+				idrt: r.IDRT,
+				loggerTypeShort: r.LoggerTypeShort ?? null,
+				isWQ: r.IsWQ,
+				sortOrder: r.SortOrder ?? null
+			}))
+		)
+		.onConflictDoNothing();
+	console.log(`Seeded ${readTypeRows.length} read types`);
 
-// Seed LUT_BoringMethod
-type RawBoringMethod = { ID: number; BoringMethod: string };
-const boringMethodRows = parseNdjson<RawBoringMethod>(`${dataDir}/LUT_BoringMethod.json`);
-db.insert(schema.lutBoringMethod)
-	.values(boringMethodRows.map((r) => ({ id: r.ID, boringMethod: r.BoringMethod })))
-	.onConflictDoNothing()
-	.run();
-console.log(`Seeded ${boringMethodRows.length} boring methods`);
+	// Seed LUT_BoringMethod
+	type RawBoringMethod = { ID: number; BoringMethod: string };
+	const boringMethodRows = parseNdjson<RawBoringMethod>(`${dataDir}/LUT_BoringMethod.json`);
+	await db
+		.insert(schema.lutBoringMethod)
+		.values(boringMethodRows.map((r) => ({ id: r.ID, boringMethod: r.BoringMethod })))
+		.onConflictDoNothing();
+	console.log(`Seeded ${boringMethodRows.length} boring methods`);
 
-// Seed Stations
-type RawStation = {
-	ID: number;
-	ProjectID: number;
-	TypeID: number;
-	Code?: string;
-	BeginDT?: string;
-	EndDT?: string;
-	StaName: string;
-	LabelAlt?: string;
-	Longitude?: number;
-	Latitude?: number;
-	LocationTypeID?: number;
-	Initials: string;
-	InstTypeID?: number;
-	InstUnitsID?: number;
-	StationTypeID?: number;
-	ISGS_ID?: string;
-	BorDT?: string;
-	BorMethodID?: number;
-	Comment?: string;
-};
-const stationRows = parseNdjson<RawStation>(`${dataDir}/Stations.json`);
-const stationValues = stationRows.map((r) => ({
-	id: r.ID,
-	projectId: r.ProjectID,
-	typeId: r.TypeID,
-	code: r.Code ?? null,
-	beginDt: parseDate(r.BeginDT),
-	endDt: parseDate(r.EndDT),
-	staName: r.StaName,
-	labelAlt: r.LabelAlt ?? null,
-	longitude: r.Longitude ?? null,
-	latitude: r.Latitude ?? null,
-	locationTypeId: r.LocationTypeID ?? null,
-	initials: r.Initials,
-	instTypeId: r.InstTypeID ?? null,
-	instUnitsId: r.InstUnitsID ?? null,
-	stationTypeId: r.StationTypeID ?? null,
-	isgsId: r.ISGS_ID ?? null,
-	borDt: parseDate(r.BorDT),
-	borMethodId: r.BorMethodID ?? null,
-	comment: r.Comment ?? null
-}));
-for (const chunk of chunkArray(stationValues, 50)) {
-	db.insert(schema.stations).values(chunk).onConflictDoNothing().run();
+	// Seed Stations
+	type RawStation = {
+		ID: number;
+		ProjectID: number;
+		TypeID: number;
+		Code?: string;
+		BeginDT?: string;
+		EndDT?: string;
+		StaName: string;
+		LabelAlt?: string;
+		Longitude?: number;
+		Latitude?: number;
+		LocationTypeID?: number;
+		Initials: string;
+		InstTypeID?: number;
+		InstUnitsID?: number;
+		StationTypeID?: number;
+		ISGS_ID?: string;
+		BorDT?: string;
+		BorMethodID?: number;
+		Comment?: string;
+	};
+	const stationRows = parseNdjson<RawStation>(`${dataDir}/Stations.json`);
+	const stationValues = stationRows.map((r) => ({
+		id: r.ID,
+		projectId: r.ProjectID,
+		typeId: r.TypeID,
+		code: r.Code ?? null,
+		beginDt: parseDate(r.BeginDT),
+		endDt: parseDate(r.EndDT),
+		staName: r.StaName,
+		labelAlt: r.LabelAlt ?? null,
+		longitude: r.Longitude ?? null,
+		latitude: r.Latitude ?? null,
+		locationTypeId: r.LocationTypeID ?? null,
+		initials: r.Initials,
+		instTypeId: r.InstTypeID ?? null,
+		instUnitsId: r.InstUnitsID ?? null,
+		stationTypeId: r.StationTypeID ?? null,
+		isgsId: r.ISGS_ID ?? null,
+		borDt: parseDate(r.BorDT),
+		borMethodId: r.BorMethodID ?? null,
+		comment: r.Comment ?? null
+	}));
+	for (const chunk of chunkArray(stationValues, 50)) {
+		await db.insert(schema.stations).values(chunk).onConflictDoNothing();
+	}
+	console.log(`Seeded ${stationRows.length} stations`);
+
+	// Sync sequences so subsequent inserts get correct auto-incremented IDs
+	await db.execute(sql`SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects))`);
+	await db.execute(sql`SELECT setval('visits_id_seq', (SELECT MAX(id) FROM visits))`);
+	await db.execute(sql`SELECT setval('stations_id_seq', (SELECT MAX(id) FROM stations))`);
+	await db.execute(sql`SELECT setval('sites_id_seq', COALESCE((SELECT MAX(id) FROM sites), 0))`);
+	console.log('Sequences synced');
+
+	await client.end();
 }
-console.log(`Seeded ${stationRows.length} stations`);
+
+main().catch((err) => {
+	console.error(err);
+	process.exit(1);
+});

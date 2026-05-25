@@ -5,15 +5,15 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const row = db
+	const [row] = await db
 		.select()
 		.from(lutcInitials)
 		.where(eq(lutcInitials.initials, params.initials))
-		.get();
+		.limit(1);
 
 	if (!row) error(404, 'Person not found');
 
-	const scientistVisits = db
+	const scientistVisits = await db
 		.select({
 			id: visits.id,
 			dt: visits.dt,
@@ -24,8 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.from(visits)
 		.leftJoin(projects, eq(visits.projectId, projects.id))
 		.where(eq(visits.by, params.initials))
-		.orderBy(visits.dt)
-		.all();
+		.orderBy(visits.dt);
 
 	return { scientist: row, visits: scientistVisits };
 };
@@ -34,19 +33,19 @@ export const actions: Actions = {
 	update: async ({ request, params }) => {
 		const data = await request.formData();
 
-		db.update(lutcInitials)
+		await db
+			.update(lutcInitials)
 			.set({
 				firstName: (data.get('firstName') as string) || null,
 				lastName: (data.get('lastName') as string) || null
 			})
-			.where(eq(lutcInitials.initials, params.initials))
-			.run();
+			.where(eq(lutcInitials.initials, params.initials));
 
 		redirect(303, `/maintenance/people/${params.initials}`);
 	},
 
 	delete: async ({ params }) => {
-		db.delete(lutcInitials).where(eq(lutcInitials.initials, params.initials)).run();
+		await db.delete(lutcInitials).where(eq(lutcInitials.initials, params.initials));
 		redirect(303, '/maintenance/people');
 	}
 };

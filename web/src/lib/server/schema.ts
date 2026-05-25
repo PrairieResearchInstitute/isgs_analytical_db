@@ -1,30 +1,30 @@
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
+import { pgTable, integer, text, doublePrecision, serial } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-export const sites = sqliteTable('sites', {
-	id: integer('id').primaryKey({ autoIncrement: true }),
+export const sites = pgTable('sites', {
+	id: serial('id').primaryKey(),
 	name: text('name').notNull(),
 	location: text('location'),
-	latitude: real('latitude'),
-	longitude: real('longitude'),
+	latitude: doublePrecision('latitude'),
+	longitude: doublePrecision('longitude'),
 	createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
 });
 
 export type Site = typeof sites.$inferSelect;
 export type NewSite = typeof sites.$inferInsert;
 
-export const lutSiteType = sqliteTable('lut_site_type', {
+export const lutSiteType = pgTable('lut_site_type', {
 	id: integer('id').primaryKey(),
 	siteType: text('site_type').notNull()
 });
 
-export const lutCountyNames = sqliteTable('lut_county_names', {
+export const lutCountyNames = pgTable('lut_county_names', {
 	cntycode: integer('cntycode').primaryKey(),
 	cntyname: text('cntyname')
 });
 
-export const projects = sqliteTable('projects', {
-	id: integer('id').primaryKey(),
+export const projects = pgTable('projects', {
+	id: serial('id').primaryKey(),
 	isgsNum: text('isgs_num'),
 	idotName: text('idot_name'),
 	isgsName: text('isgs_name'),
@@ -36,14 +36,14 @@ export const projects = sqliteTable('projects', {
 	seqCode: text('seq_code')
 });
 
-export const lutcInitials = sqliteTable('lutc_initials', {
+export const lutcInitials = pgTable('lutc_initials', {
 	initials: text('initials').primaryKey(),
 	firstName: text('first_name'),
 	lastName: text('last_name')
 });
 
-export const visits = sqliteTable('visits', {
-	id: integer('id').primaryKey(),
+export const visits = pgTable('visits', {
+	id: serial('id').primaryKey(),
 	projectId: integer('project_id')
 		.notNull()
 		.references(() => projects.id),
@@ -56,30 +56,30 @@ export const visits = sqliteTable('visits', {
 	reviewedDate: text('reviewed_date')
 });
 
-export const lutStationType = sqliteTable('lut_station_type', {
+export const lutStationType = pgTable('lut_station_type', {
 	id: integer('id').primaryKey(),
 	type: text('type').notNull(),
 	shortType: text('short_type')
 });
 
-export const lutLocationType = sqliteTable('lut_location_type', {
+export const lutLocationType = pgTable('lut_location_type', {
 	id: integer('id').primaryKey(),
 	locationType: text('location_type').notNull()
 });
 
-export const lutStationInstType = sqliteTable('lut_station_inst_type', {
+export const lutStationInstType = pgTable('lut_station_inst_type', {
 	id: integer('id').primaryKey(),
 	instType: text('inst_type').notNull(),
 	wleEquation: text('wle_equation')
 });
 
-export const lutStationUnits = sqliteTable('lut_station_units', {
+export const lutStationUnits = pgTable('lut_station_units', {
 	id: integer('id').primaryKey(),
 	unitsReading: text('units_reading').notNull(),
-	convFactor: real('conv_factor')
+	convFactor: doublePrecision('conv_factor')
 });
 
-export const lutStationReadType = sqliteTable('lut_station_read_type', {
+export const lutStationReadType = pgTable('lut_station_read_type', {
 	id: integer('id').primaryKey(),
 	loggerType: text('logger_type').notNull(),
 	readType: text('read_type').notNull(),
@@ -89,13 +89,13 @@ export const lutStationReadType = sqliteTable('lut_station_read_type', {
 	sortOrder: integer('sort_order')
 });
 
-export const lutBoringMethod = sqliteTable('lut_boring_method', {
+export const lutBoringMethod = pgTable('lut_boring_method', {
 	id: integer('id').primaryKey(),
 	boringMethod: text('boring_method').notNull()
 });
 
-export const stations = sqliteTable('stations', {
-	id: integer('id').primaryKey(),
+export const stations = pgTable('stations', {
+	id: serial('id').primaryKey(),
 	projectId: integer('project_id')
 		.notNull()
 		.references(() => projects.id),
@@ -107,8 +107,8 @@ export const stations = sqliteTable('stations', {
 	endDt: text('end_dt'),
 	staName: text('sta_name').notNull(),
 	labelAlt: text('label_alt'),
-	longitude: real('longitude'),
-	latitude: real('latitude'),
+	longitude: doublePrecision('longitude'),
+	latitude: doublePrecision('latitude'),
 	locationTypeId: integer('location_type_id').references(() => lutLocationType.id),
 	initials: text('initials')
 		.notNull()

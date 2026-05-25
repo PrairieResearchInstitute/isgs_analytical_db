@@ -5,7 +5,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const scientists = db
+	const scientists = await db
 		.select({
 			initials: lutcInitials.initials,
 			firstName: lutcInitials.firstName,
@@ -15,8 +15,7 @@ export const load: PageServerLoad = async () => {
 		.from(lutcInitials)
 		.leftJoin(visits, eq(visits.by, lutcInitials.initials))
 		.groupBy(lutcInitials.initials)
-		.orderBy(asc(lutcInitials.lastName), asc(lutcInitials.firstName))
-		.all();
+		.orderBy(asc(lutcInitials.lastName), asc(lutcInitials.firstName));
 	return { scientists };
 };
 
@@ -26,13 +25,11 @@ export const actions: Actions = {
 		const initials = (data.get('initials') as string)?.trim();
 		if (!initials) return fail(400, { error: 'Initials are required' });
 
-		db.insert(lutcInitials)
-			.values({
-				initials,
-				firstName: (data.get('firstName') as string) || null,
-				lastName: (data.get('lastName') as string) || null
-			})
-			.run();
+		await db.insert(lutcInitials).values({
+			initials,
+			firstName: (data.get('firstName') as string) || null,
+			lastName: (data.get('lastName') as string) || null
+		});
 
 		redirect(303, '/maintenance/people');
 	}
