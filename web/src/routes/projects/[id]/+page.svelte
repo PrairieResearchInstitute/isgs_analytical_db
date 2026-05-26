@@ -7,6 +7,7 @@
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let stationDialog = $state<HTMLDialogElement | null>(null);
 	let editingStation = $state<(typeof data.stations)[0] | null>(null);
+	let visitDialog = $state<HTMLDialogElement | null>(null);
 
 	function onDialogClick(e: MouseEvent) {
 		if (e.target === dialog) dialog?.close();
@@ -14,6 +15,10 @@
 
 	function onStationDialogClick(e: MouseEvent) {
 		if (e.target === stationDialog) stationDialog?.close();
+	}
+
+	function onVisitDialogClick(e: MouseEvent) {
+		if (e.target === visitDialog) visitDialog?.close();
 	}
 
 	function openAddStation() {
@@ -167,7 +172,16 @@
 
 <!-- Visits table -->
 <div class="mt-8">
-	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Visits</h2>
+	<div class="flex items-center justify-between mb-4">
+		<h2 class="font-heading font-bold text-xl text-il-blue">Visits</h2>
+		<button
+			type="button"
+			onclick={() => visitDialog?.showModal()}
+			class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
+		>
+			+ New Visit
+		</button>
+	</div>
 	{#if data.visits.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
 			No visits recorded for this project.
@@ -189,7 +203,11 @@
 						<tr
 							class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
 						>
-							<td class="px-4 py-3 text-il-storm">{visit.dt ?? '—'}</td>
+							<td class="px-4 py-3 whitespace-nowrap">
+								<a href="/visits/{visit.id}" class="text-il-blue hover:underline font-semibold">
+									{visit.dt ?? '—'}
+								</a>
+							</td>
 							<td class="px-4 py-3 font-semibold">
 								<a href="/maintenance/people/{visit.by}" class="text-il-blue hover:underline">
 									{[visit.firstName, visit.lastName].filter(Boolean).join(' ') || visit.by || '—'}
@@ -816,4 +834,103 @@
 			</form>
 		</div>
 	{/if}
+</dialog>
+
+<!-- New visit dialog -->
+<dialog
+	bind:this={visitDialog}
+	onclick={onVisitDialogClick}
+	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
+>
+	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
+		<h2 class="font-heading font-bold text-xl text-il-blue">New Visit</h2>
+		<button
+			type="button"
+			onclick={() => visitDialog?.close()}
+			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
+			aria-label="Close"
+		>
+			&times;
+		</button>
+	</div>
+
+	<form
+		method="POST"
+		action="?/addVisit"
+		use:enhance={() =>
+			({ update }) =>
+				update().then(() => visitDialog?.close())}
+		class="px-6 py-5 flex flex-col gap-4"
+	>
+		<!-- Field Scientist -->
+		<div class="flex flex-col gap-1">
+			<label
+				for="visitBy"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
+				Field Scientist <span class="text-il-orange">*</span>
+			</label>
+			<select
+				id="visitBy"
+				name="by"
+				required
+				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
+			>
+				<option value="">— Select scientist —</option>
+				{#each data.scientists as s (s.initials)}
+					<option value={s.initials}>
+						{[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials} ({s.initials})
+					</option>
+				{/each}
+			</select>
+		</div>
+
+		<!-- Date -->
+		<div class="flex flex-col gap-1">
+			<label
+				for="visitDt"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
+				Date
+			</label>
+			<input
+				id="visitDt"
+				name="dt"
+				type="date"
+				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
+			/>
+		</div>
+
+		<!-- Notes -->
+		<div class="flex flex-col gap-1">
+			<label
+				for="visitNote"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
+				Notes
+			</label>
+			<textarea
+				id="visitNote"
+				name="note"
+				rows={3}
+				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-none"
+			></textarea>
+		</div>
+
+		<div class="flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
+			<button
+				type="button"
+				onclick={() => visitDialog?.close()}
+				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
+			>
+				Cancel
+			</button>
+			<button
+				type="submit"
+				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
+			>
+				Create Visit
+			</button>
+		</div>
+	</form>
 </dialog>

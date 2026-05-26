@@ -237,5 +237,21 @@ export const actions: Actions = {
 			await db.delete(stations).where(eq(stations.id, stationId));
 		}
 		redirect(303, `/projects/${projectId}`);
+	},
+
+	addVisit: async ({ request, params }) => {
+		const projectId = parseInt(params.id);
+		const data = await request.formData();
+		const by = (data.get('by') as string)?.trim();
+		if (!by) return fail(400, { error: 'Field Scientist is required' });
+
+		await db.insert(visits).values({
+			projectId,
+			by,
+			dt: (data.get('dt') as string) || null,
+			note: (data.get('note') as string) || null
+		});
+
+		redirect(303, `/projects/${projectId}`);
 	}
 };
