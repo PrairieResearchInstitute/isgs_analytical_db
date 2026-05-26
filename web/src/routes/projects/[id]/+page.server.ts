@@ -13,6 +13,7 @@ import {
 	lutStationReadType,
 	lutBoringMethod
 } from '$lib/server/schema';
+import { createVisitWithStations } from '$lib/server/visitHelpers';
 import { desc, eq } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -245,7 +246,7 @@ export const actions: Actions = {
 		const by = (data.get('by') as string)?.trim();
 		if (!by) return fail(400, { error: 'Field Scientist is required' });
 
-		await db.insert(visits).values({
+		await createVisitWithStations({
 			projectId,
 			by,
 			dt: (data.get('dt') as string) || null,

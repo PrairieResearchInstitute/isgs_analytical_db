@@ -1,5 +1,6 @@
 import { db } from '$lib/server/db';
 import { visits, projects, lutcInitials } from '$lib/server/schema';
+import { createVisitWithStations } from '$lib/server/visitHelpers';
 import { eq, desc, asc } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -43,7 +44,7 @@ export const actions: Actions = {
 		const projectId = parseInt(projectIdRaw);
 		if (isNaN(projectId)) return fail(400, { error: 'Invalid project' });
 
-		await db.insert(visits).values({
+		await createVisitWithStations({
 			projectId,
 			by,
 			dt: (data.get('dt') as string) || null,

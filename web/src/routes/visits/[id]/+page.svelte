@@ -114,3 +114,44 @@
 		{/if}
 	</dl>
 </div>
+
+<!-- Station Visits section -->
+<div class="mt-8">
+	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Station Visits</h2>
+	{#if data.stationVisits.length === 0}
+		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
+			No stations recorded for this visit.
+		</div>
+	{:else}
+		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
+			<div class="overflow-y-auto max-h-[440px]">
+				<table class="w-full text-sm font-sans">
+					<thead class="bg-il-blue text-white sticky top-0 z-10">
+						<tr>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Station</th>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Code</th>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Time</th>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Level</th>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Status</th>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.stationVisits as sv (sv.id)}
+							<tr
+								class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
+							>
+								<td class="px-4 py-3 font-semibold text-il-storm-30">{sv.staName ?? '—'}</td>
+								<td class="px-4 py-3 font-mono text-il-storm">{sv.code ?? '—'}</td>
+								<td class="px-4 py-3 text-il-storm">{sv.time ?? '—'}</td>
+								<td class="px-4 py-3 text-il-storm">{sv.level ?? '—'}</td>
+								<td class="px-4 py-3 text-il-storm">{sv.status ?? '—'}</td>
+								<td class="px-4 py-3 text-il-storm">{sv.notes ?? '—'}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{/if}
+</div>
