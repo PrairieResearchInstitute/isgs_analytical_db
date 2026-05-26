@@ -20,6 +20,7 @@
 		"*.{ts,js,svelte}": "eslint --fix"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1053.0",
 		"drizzle-orm": "^0.43.1",
 		"postgres": "^3.4.5"
 	},

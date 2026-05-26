@@ -28,6 +28,54 @@ To re-seed without rebuilding (seed is idempotent):
 docker compose run --rm seed
 ```
 
+## Object storage (RustFS)
+
+The stack includes [RustFS](https://rustfs.com), an S3-compatible object storage server. It is exposed on the host so you can access it from development code or tools.
+
+| Endpoint | Default | Description |
+|---|---|---|
+| S3 API | `http://localhost:9000` | Use this in code (AWS SDK, boto3, etc.) |
+| Web console | `http://localhost:9001` | Browser-based bucket manager |
+
+Default credentials (change via env vars before running):
+
+| Env var | Default | Purpose |
+|---|---|---|
+| `RUSTFS_ACCESS_KEY` | `rustfsadmin` | S3 access key / username |
+| `RUSTFS_SECRET_KEY` | `rustfsadmin` | S3 secret key / password |
+| `RUSTFS_HOST_PORT` | `9000` | Host port for the S3 API |
+| `RUSTFS_CONSOLE_PORT` | `9001` | Host port for the web console |
+| `RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS` | `true` | Required when using default credentials on a non-loopback listener |
+
+To connect from host code, configure your S3 client with:
+
+```
+endpoint:   http://localhost:9000
+access_key: rustfsadmin
+secret_key: rustfsadmin
+region:     us-east-1   # any value — RustFS ignores it
+```
+
+Add credentials to `web/.env` so the app picks them up without extra flags:
+
+```
+RUSTFS_ENDPOINT=http://localhost:9000
+RUSTFS_ACCESS_KEY=rustfsadmin
+RUSTFS_SECRET_KEY=rustfsadmin
+```
+
+If port 9000 or 9001 is already in use, override:
+
+```bash
+RUSTFS_HOST_PORT=9090 RUSTFS_CONSOLE_PORT=9091 docker compose up
+```
+
+To start only the storage service during development:
+
+```bash
+docker compose up rustfs -d
+```
+
 ## Local development against the Docker database
 
 Start just the database, then run the SvelteKit dev server on the host:
@@ -56,7 +104,7 @@ npm run db:push      # Apply schema changes after editing schema.ts
 ## Project structure
 
 ```
-docker-compose.yml            # postgres + seed + web services
+docker-compose.yml            # postgres + seed + web + rustfs services
 data/                         # NDJSON seed files
 web/
   src/
