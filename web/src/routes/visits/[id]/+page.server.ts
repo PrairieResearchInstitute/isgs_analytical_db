@@ -5,7 +5,8 @@ import {
 	lutcInitials,
 	stations,
 	stationVisits,
-	lutStatus
+	lutStatus,
+	importQueue
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
@@ -72,16 +73,21 @@ export const actions: Actions = {
 
 		if (files.length > 0) {
 			await ensureBucket('watershed');
-			await Promise.all(
-				files.map(async (file) =>
-					uploadFile(
+			const keys = await Promise.all(
+				files.map(async (file) => {
+					const key = `station-visits/${svId}/${Date.now()}-${file.name}`;
+					await uploadFile(
 						'watershed',
-						`station-visits/${svId}/${Date.now()}-${file.name}`,
+						key,
 						await file.arrayBuffer(),
 						file.type || 'application/octet-stream'
-					)
-				)
+					);
+					return key;
+				})
 			);
+			await db
+				.insert(importQueue)
+				.values(keys.map((key) => ({ stationVisitId: svId, uri: `s3://watershed/${key}` })));
 		}
 
 		await db

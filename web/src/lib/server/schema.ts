@@ -1,4 +1,13 @@
-import { pgTable, integer, text, doublePrecision, serial, real, time } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	integer,
+	text,
+	doublePrecision,
+	serial,
+	real,
+	time,
+	timestamp
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const sites = pgTable('sites', {
@@ -160,3 +169,15 @@ export const stationVisits = pgTable('station_visits', {
 
 export type StationVisit = typeof stationVisits.$inferSelect;
 export type NewStationVisit = typeof stationVisits.$inferInsert;
+
+export const importQueue = pgTable('import_queue', {
+	id: serial('id').primaryKey(),
+	stationVisitId: integer('station_visit_id')
+		.notNull()
+		.references(() => stationVisits.id),
+	uri: text('uri').notNull(),
+	timestamp: timestamp('timestamp').notNull().defaultNow()
+});
+
+export type ImportQueueEntry = typeof importQueue.$inferSelect;
+export type NewImportQueueEntry = typeof importQueue.$inferInsert;
