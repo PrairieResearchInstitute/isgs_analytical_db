@@ -218,6 +218,15 @@ async function main() {
 		.onConflictDoNothing();
 	console.log(`Seeded ${readTypeRows.length} read types`);
 
+	// Seed LUT_Status
+	type RawStatus = { ID: number; Status: string };
+	const statusRows = parseNdjson<RawStatus>(`${dataDir}/LUT_Status.json`);
+	await db
+		.insert(schema.lutStatus)
+		.values(statusRows.map((r) => ({ id: r.ID, status: r.Status })))
+		.onConflictDoNothing();
+	console.log(`Seeded ${statusRows.length} statuses`);
+
 	// Seed LUT_BoringMethod
 	type RawBoringMethod = { ID: number; BoringMethod: string };
 	const boringMethodRows = parseNdjson<RawBoringMethod>(`${dataDir}/LUT_BoringMethod.json`);

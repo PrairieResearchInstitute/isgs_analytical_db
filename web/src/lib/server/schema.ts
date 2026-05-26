@@ -1,4 +1,4 @@
-import { pgTable, integer, text, doublePrecision, serial } from 'drizzle-orm/pg-core';
+import { pgTable, integer, text, doublePrecision, serial, real, time } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const sites = pgTable('sites', {
@@ -94,6 +94,11 @@ export const lutBoringMethod = pgTable('lut_boring_method', {
 	boringMethod: text('boring_method').notNull()
 });
 
+export const lutStatus = pgTable('lut_status', {
+	id: integer('id').primaryKey(),
+	status: text('status').notNull()
+});
+
 export const stations = pgTable('stations', {
 	id: serial('id').primaryKey(),
 	projectId: integer('project_id')
@@ -135,5 +140,23 @@ export type LutStationInstType = typeof lutStationInstType.$inferSelect;
 export type LutStationUnits = typeof lutStationUnits.$inferSelect;
 export type LutStationReadType = typeof lutStationReadType.$inferSelect;
 export type LutBoringMethod = typeof lutBoringMethod.$inferSelect;
+export type LutStatus = typeof lutStatus.$inferSelect;
 export type Station = typeof stations.$inferSelect;
 export type NewStation = typeof stations.$inferInsert;
+
+export const stationVisits = pgTable('station_visits', {
+	id: serial('id').primaryKey(),
+	visitId: integer('visit_id')
+		.notNull()
+		.references(() => visits.id),
+	stationId: integer('station_id')
+		.notNull()
+		.references(() => stations.id),
+	statusId: integer('status_id').references(() => lutStatus.id),
+	level: real('level'),
+	time: time('time'),
+	notes: text('notes')
+});
+
+export type StationVisit = typeof stationVisits.$inferSelect;
+export type NewStationVisit = typeof stationVisits.$inferInsert;
