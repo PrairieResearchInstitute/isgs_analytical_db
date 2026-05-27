@@ -170,6 +170,19 @@ export const stationVisits = pgTable('station_visits', {
 export type StationVisit = typeof stationVisits.$inferSelect;
 export type NewStationVisit = typeof stationVisits.$inferInsert;
 
+export const pressureTemperatureDepth = pgTable('pressure_temperature_depth', {
+	id: serial('id').primaryKey(),
+	stationVisitId: integer('station_visit_id')
+		.notNull()
+		.references(() => stationVisits.id),
+	pressure: real('pressure'),
+	temperature: real('temperature'),
+	depth: real('depth')
+});
+
+export type PressureTemperatureDepth = typeof pressureTemperatureDepth.$inferSelect;
+export type NewPressureTemperatureDepth = typeof pressureTemperatureDepth.$inferInsert;
+
 export const importQueue = pgTable('import_queue', {
 	id: serial('id').primaryKey(),
 	stationVisitId: integer('station_visit_id')

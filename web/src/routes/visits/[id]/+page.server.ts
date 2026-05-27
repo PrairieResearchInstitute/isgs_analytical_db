@@ -6,7 +6,8 @@ import {
 	stations,
 	stationVisits,
 	lutStatus,
-	importQueue
+	importQueue,
+	pressureTemperatureDepth
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
@@ -17,7 +18,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id);
 	if (isNaN(id)) throw error(404, 'Visit not found');
 
-	const [rows, svRows, statuses] = await Promise.all([
+	const [rows, svRows, statuses, ptdRows] = await Promise.all([
 		db
 			.select({
 				id: visits.id,
@@ -53,12 +54,24 @@ export const load: PageServerLoad = async ({ params }) => {
 			.leftJoin(lutStatus, eq(stationVisits.statusId, lutStatus.id))
 			.where(eq(stationVisits.visitId, id))
 			.orderBy(asc(stations.staName)),
-		db.select().from(lutStatus).orderBy(lutStatus.status)
+		db.select().from(lutStatus).orderBy(lutStatus.status),
+		db
+			.select({
+				id: pressureTemperatureDepth.id,
+				stationVisitId: pressureTemperatureDepth.stationVisitId,
+				pressure: pressureTemperatureDepth.pressure,
+				temperature: pressureTemperatureDepth.temperature,
+				depth: pressureTemperatureDepth.depth
+			})
+			.from(pressureTemperatureDepth)
+			.innerJoin(stationVisits, eq(pressureTemperatureDepth.stationVisitId, stationVisits.id))
+			.where(eq(stationVisits.visitId, id))
+			.orderBy(asc(pressureTemperatureDepth.depth))
 	]);
 
 	if (rows.length === 0) throw error(404, 'Visit not found');
 
-	return { visit: rows[0], stationVisits: svRows, statuses };
+	return { visit: rows[0], stationVisits: svRows, statuses, ptdRecords: ptdRows };
 };
 
 export const actions: Actions = {
@@ -101,5 +114,48 @@ export const actions: Actions = {
 			.where(eq(stationVisits.id, svId));
 
 		redirect(303, `/visits/${visitId}`);
+	},
+
+	addPtd: async ({ request }) => {
+		const data = await request.formData();
+		const svId = parseInt(data.get('stationVisitId') as string);
+		const pressureRaw = (data.get('pressure') as string)?.trim();
+		const temperatureRaw = (data.get('temperature') as string)?.trim();
+		const depthRaw = (data.get('depth') as string)?.trim();
+
+		await db.insert(pressureTemperatureDepth).values({
+			stationVisitId: svId,
+			pressure: pressureRaw !== '' ? parseFloat(pressureRaw) : null,
+			temperature: temperatureRaw !== '' ? parseFloat(temperatureRaw) : null,
+			depth: depthRaw !== '' ? parseFloat(depthRaw) : null
+		});
+
+		return {};
+	},
+
+	updatePtd: async ({ request }) => {
+		const data = await request.formData();
+		const ptdId = parseInt(data.get('ptdId') as string);
+		const pressureRaw = (data.get('pressure') as string)?.trim();
+		const temperatureRaw = (data.get('temperature') as string)?.trim();
+		const depthRaw = (data.get('depth') as string)?.trim();
+
+		await db
+			.update(pressureTemperatureDepth)
+			.set({
+				pressure: pressureRaw !== '' ? parseFloat(pressureRaw) : null,
+				temperature: temperatureRaw !== '' ? parseFloat(temperatureRaw) : null,
+				depth: depthRaw !== '' ? parseFloat(depthRaw) : null
+			})
+			.where(eq(pressureTemperatureDepth.id, ptdId));
+
+		return {};
+	},
+
+	deletePtd: async ({ request }) => {
+		const data = await request.formData();
+		const ptdId = parseInt(data.get('ptdId') as string);
+		await db.delete(pressureTemperatureDepth).where(eq(pressureTemperatureDepth.id, ptdId));
+		return {};
 	}
 };

@@ -10,6 +10,10 @@
 	let isDragging = $state(false);
 	let fileInput = $state<HTMLInputElement | null>(null);
 
+	let ptdDialog = $state<HTMLDialogElement | null>(null);
+	let ptdSV = $state<(typeof data.stationVisits)[0] | null>(null);
+	let ptdRows = $derived(data.ptdRecords.filter((r) => r.stationVisitId === ptdSV?.id));
+
 	function openEditSV(sv: (typeof data.stationVisits)[0]) {
 		editingSV = sv;
 		selectedFiles = [];
@@ -36,6 +40,15 @@
 
 	function onSVDialogClick(e: MouseEvent) {
 		if (e.target === stationVisitDialog) stationVisitDialog?.close();
+	}
+
+	function openPtd(sv: (typeof data.stationVisits)[0]) {
+		ptdSV = sv;
+		ptdDialog?.showModal();
+	}
+
+	function onPtdDialogClick(e: MouseEvent) {
+		if (e.target === ptdDialog) ptdDialog?.close();
 	}
 
 	function formatDate(val: string | null): string {
@@ -170,6 +183,7 @@
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Status</th>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
 							<th class="px-4 py-3"></th>
+							<th class="px-4 py-3"></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -190,6 +204,15 @@
 										class="text-il-blue hover:underline text-sm font-sans font-semibold"
 									>
 										Edit
+									</button>
+								</td>
+								<td class="px-4 py-3">
+									<button
+										type="button"
+										onclick={() => openPtd(sv)}
+										class="text-il-blue hover:underline text-sm font-sans font-semibold"
+									>
+										PTD
 									</button>
 								</td>
 							</tr>
@@ -413,4 +436,175 @@
 			</button>
 		</div>
 	</form>
+</dialog>
+
+<!-- PTD Measurements dialog -->
+<dialog
+	bind:this={ptdDialog}
+	onclick={onPtdDialogClick}
+	class="w-full max-w-2xl rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
+>
+	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
+		<h2 class="font-heading font-bold text-xl text-il-blue">
+			PTD Measurements — {ptdSV?.staName ?? ''}
+		</h2>
+		<button
+			type="button"
+			onclick={() => ptdDialog?.close()}
+			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
+			aria-label="Close"
+		>
+			&times;
+		</button>
+	</div>
+
+	<div class="px-6 py-5 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
+		<!-- Editable measurements table -->
+		<div class="border border-il-cloud rounded overflow-hidden">
+			<table class="w-full text-sm font-sans">
+				<thead class="bg-il-blue text-white">
+					<tr>
+						<th class="text-left px-3 py-2 font-heading font-semibold tracking-wide">Depth</th>
+						<th class="text-left px-3 py-2 font-heading font-semibold tracking-wide">Pressure</th>
+						<th class="text-left px-3 py-2 font-heading font-semibold tracking-wide">Temperature</th
+						>
+						<th class="px-3 py-2"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each ptdRows as row (row.id)}
+						<tr
+							class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
+						>
+							<td class="px-3 py-2">
+								<input
+									type="number"
+									name="depth"
+									step="any"
+									value={row.depth ?? ''}
+									form="ptd-save-{row.id}"
+									class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
+								/>
+							</td>
+							<td class="px-3 py-2">
+								<input
+									type="number"
+									name="pressure"
+									step="any"
+									value={row.pressure ?? ''}
+									form="ptd-save-{row.id}"
+									class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
+								/>
+							</td>
+							<td class="px-3 py-2">
+								<input
+									type="number"
+									name="temperature"
+									step="any"
+									value={row.temperature ?? ''}
+									form="ptd-save-{row.id}"
+									class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
+								/>
+							</td>
+							<td class="px-3 py-2 whitespace-nowrap">
+								<button
+									type="submit"
+									form="ptd-save-{row.id}"
+									class="text-il-blue hover:underline text-sm font-sans font-semibold mr-3"
+								>
+									Save
+								</button>
+								<button
+									type="submit"
+									form="ptd-del-{row.id}"
+									class="text-red-600 hover:underline text-sm font-sans font-semibold"
+								>
+									Delete
+								</button>
+							</td>
+						</tr>
+					{/each}
+
+					<!-- Add row form rendered inline at bottom of table -->
+					<tr class="border-t-2 border-il-cloud bg-il-storm-95">
+						<td class="px-3 py-2">
+							<input
+								type="number"
+								name="depth"
+								step="any"
+								form="ptd-add"
+								placeholder="Depth"
+								class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
+							/>
+						</td>
+						<td class="px-3 py-2">
+							<input
+								type="number"
+								name="pressure"
+								step="any"
+								form="ptd-add"
+								placeholder="Pressure"
+								class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
+							/>
+						</td>
+						<td class="px-3 py-2">
+							<input
+								type="number"
+								name="temperature"
+								step="any"
+								form="ptd-add"
+								placeholder="Temperature"
+								class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
+							/>
+						</td>
+						<td class="px-3 py-2">
+							<button
+								type="submit"
+								form="ptd-add"
+								class="text-il-blue hover:underline text-sm font-sans font-semibold whitespace-nowrap"
+							>
+								+ Add row
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Per-row save/delete forms (placed outside table to satisfy HTML5) -->
+		{#each ptdRows as row (row.id)}
+			<form
+				id="ptd-save-{row.id}"
+				method="POST"
+				action="?/updatePtd"
+				use:enhance={() =>
+					({ update }) =>
+						update({ invalidateAll: true })}
+			>
+				<input type="hidden" name="ptdId" value={row.id} />
+			</form>
+			<form
+				id="ptd-del-{row.id}"
+				method="POST"
+				action="?/deletePtd"
+				use:enhance={() =>
+					({ update }) =>
+						update({ invalidateAll: true })}
+			>
+				<input type="hidden" name="ptdId" value={row.id} />
+			</form>
+		{/each}
+
+		<!-- Add row form (also outside table) -->
+		<form
+			id="ptd-add"
+			method="POST"
+			action="?/addPtd"
+			use:enhance={() =>
+				({ update, formElement }) =>
+					update({ invalidateAll: true }).then(() => formElement.reset())}
+		>
+			<input type="hidden" name="stationVisitId" value={ptdSV?.id ?? ''} />
+		</form>
+	</div>
 </dialog>
