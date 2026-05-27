@@ -13,3 +13,6 @@ data/
 
 # Claude internal
 .claude/
+
+# Dagster (isgs_dagster/.gitignore covers .env and .venv within that directory)
+isgs_dagster/.dg/

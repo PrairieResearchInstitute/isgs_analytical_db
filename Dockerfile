@@ -22,11 +22,12 @@ FROM node:22-alpine AS seeder
 WORKDIR /app
 
 COPY web/package.json web/package-lock.json* ./
-RUN npm ci
+RUN npm ci && apk add --no-cache postgresql-client
 
 COPY web/ ./
 # /data is bind-mounted at runtime via docker-compose
-CMD ["sh", "-c", "npm run db:push && npm run db:seed"]
+# Create a second database for execlusive use by dagster
+CMD ["sh", "-c", "(psql \"$DATABASE_URL\" -c 'CREATE DATABASE dagster' 2>&1 || true) && npm run db:push && npm run db:seed"]
 
 
 FROM node:22-alpine AS runtime
