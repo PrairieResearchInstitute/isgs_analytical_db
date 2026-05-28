@@ -7,15 +7,15 @@ import dagster as dg
 from isgs_dagster.resources import PostgresResource, RustFSResource
 
 
-class PtdLoggerConfig(dg.Config):
+class DataLoggerConfig(dg.Config):
     station_visit_id: int
     uri: str  # s3://bucket/path/to/file.csv
 
 
 @dg.asset
-def ptd_logger(
+def data_logger(
     context: dg.AssetExecutionContext,
-    config: PtdLoggerConfig,
+    config: DataLoggerConfig,
     postgres: PostgresResource,
     rustfs: RustFSResource,
 ) -> dg.MaterializeResult:
@@ -46,6 +46,10 @@ def ptd_logger(
     conn = postgres.get_connection()
     try:
         with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM pressure_temperature_depth WHERE station_visit_id = %s",
+                (config.station_visit_id,),
+            )
             cur.executemany(
                 "INSERT INTO pressure_temperature_depth "
                 "(station_visit_id, pressure, temperature, depth) "

@@ -4,7 +4,7 @@ from isgs_dagster.resources import PostgresResource
 
 imported_file = dg.define_asset_job(
     name="imported_file",
-    selection=["ptd_logger"],
+    selection=["data_logger"],
 )
 
 
@@ -36,7 +36,7 @@ def import_queue_sensor(context: dg.SensorEvaluationContext, postgres: PostgresR
                 run_key=str(row_id),
                 run_config={
                     "ops": {
-                        "ptd_logger": {
+                        "data_logger": {
                             "config": {
                                 "station_visit_id": station_visit_id,
                                 "uri": uri,

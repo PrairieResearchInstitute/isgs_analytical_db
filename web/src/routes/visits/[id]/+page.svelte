@@ -28,6 +28,11 @@
 	let pressureCanvas = $state<HTMLCanvasElement | null>(null);
 	let tempCanvas = $state<HTMLCanvasElement | null>(null);
 
+	let tempDialog = $state<HTMLDialogElement | null>(null);
+	let tempSV = $state<(typeof data.stationVisits)[0] | null>(null);
+	let tempRows = $derived(data.temperatureRecords.filter((r) => r.stationVisitId === tempSV?.id));
+	let tempChartCanvas = $state<HTMLCanvasElement | null>(null);
+
 	function calcStats(vals: number[]) {
 		if (!vals.length) return null;
 		const min = Math.min(...vals);
@@ -35,6 +40,11 @@
 		const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
 		return { min, max, mean, count: vals.length };
 	}
+
+	let tempStats = $derived.by(() => {
+		const vals = tempRows.map((r) => r.temperatureCelsius).filter((v): v is number => v != null);
+		return { total: tempRows.length, temperature: calcStats(vals) };
+	});
 
 	let ptdStats = $derived.by(() => {
 		const depths = ptdRows.map((r) => r.depth).filter((v): v is number => v != null);
@@ -147,6 +157,61 @@
 		};
 	});
 
+	$effect(() => {
+		if (!tempChartCanvas || !tempRows.length) return;
+
+		const chartData = tempRows
+			.filter((r) => r.datetime != null && r.temperatureCelsius != null)
+			.map((r) => ({ x: new Date(r.datetime!).getTime(), y: r.temperatureCelsius as number }));
+
+		const chart = new Chart(tempChartCanvas, {
+			type: 'scatter',
+			data: {
+				datasets: [
+					{
+						label: 'Temperature (°C)',
+						data: chartData,
+						borderColor: '#E84A27',
+						backgroundColor: '#E84A2733',
+						pointRadius: chartData.length > 500 ? 1 : 3,
+						showLine: true,
+						borderWidth: 1.5
+					}
+				]
+			},
+			options: {
+				animation: false,
+				responsive: true,
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						callbacks: {
+							label: (ctx) =>
+								`${new Date(ctx.parsed.x!).toLocaleString()}: ${ctx.parsed.y!.toFixed(2)} °C`
+						}
+					}
+				},
+				scales: {
+					x: {
+						title: { display: true, text: 'Time', color: '#707372' },
+						ticks: {
+							color: '#707372',
+							callback: (val) => new Date(val as number).toLocaleDateString()
+						},
+						grid: { color: '#E8E9EB' }
+					},
+					y: {
+						title: { display: true, text: 'Temperature (°C)', color: '#707372' },
+						ticks: { color: '#707372' },
+						grid: { color: '#E8E9EB' }
+					}
+				}
+			}
+		});
+
+		return () => chart.destroy();
+	});
+
 	function openEditSV(sv: (typeof data.stationVisits)[0]) {
 		editingSV = sv;
 		selectedFiles = [];
@@ -182,6 +247,15 @@
 
 	function onPtdDialogClick(e: MouseEvent) {
 		if (e.target === ptdDialog) ptdDialog?.close();
+	}
+
+	function openTemp(sv: (typeof data.stationVisits)[0]) {
+		tempSV = sv;
+		tempDialog?.showModal();
+	}
+
+	function onTempDialogClick(e: MouseEvent) {
+		if (e.target === tempDialog) tempDialog?.close();
 	}
 
 	function formatDate(val: string | null): string {
@@ -317,6 +391,7 @@
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
 							<th class="px-4 py-3"></th>
 							<th class="px-4 py-3"></th>
+							<th class="px-4 py-3"></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -346,6 +421,15 @@
 										class="text-il-blue hover:underline text-sm font-sans font-semibold"
 									>
 										PTD
+									</button>
+								</td>
+								<td class="px-4 py-3">
+									<button
+										type="button"
+										onclick={() => openTemp(sv)}
+										class="text-il-blue hover:underline text-sm font-sans font-semibold"
+									>
+										Temp
 									</button>
 								</td>
 							</tr>
@@ -569,6 +653,76 @@
 			</button>
 		</div>
 	</form>
+</dialog>
+
+<!-- Temperatures dialog -->
+<dialog
+	bind:this={tempDialog}
+	onclick={onTempDialogClick}
+	class="w-full max-w-4xl rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
+>
+	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
+		<h2 class="font-heading font-bold text-xl text-il-blue">
+			Temperatures — {tempSV?.staName ?? ''}
+		</h2>
+		<button
+			type="button"
+			onclick={() => tempDialog?.close()}
+			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
+			aria-label="Close"
+		>
+			&times;
+		</button>
+	</div>
+
+	<div class="px-6 py-5 flex flex-col gap-6 overflow-y-auto max-h-[80vh]">
+		{#if tempRows.length === 0}
+			<p class="text-il-storm font-sans text-sm text-center py-8">
+				No temperature data for this station visit.
+			</p>
+		{:else}
+			<!-- Summary statistics -->
+			<div class="grid grid-cols-1 gap-4 max-w-xs">
+				<div class="border border-il-cloud rounded p-4 bg-il-storm-95">
+					<div class="font-heading font-semibold text-il-blue text-sm mb-2">Temperature (°C)</div>
+					<div class="text-xs font-sans text-il-storm space-y-1">
+						<div class="flex justify-between">
+							<span>Records</span>
+							<span class="font-semibold text-il-storm-30"
+								>{tempStats.temperature?.count ?? '—'}</span
+							>
+						</div>
+						<div class="flex justify-between">
+							<span>Min</span>
+							<span class="font-semibold text-il-storm-30"
+								>{tempStats.temperature ? tempStats.temperature.min.toFixed(2) : '—'}</span
+							>
+						</div>
+						<div class="flex justify-between">
+							<span>Max</span>
+							<span class="font-semibold text-il-storm-30"
+								>{tempStats.temperature ? tempStats.temperature.max.toFixed(2) : '—'}</span
+							>
+						</div>
+						<div class="flex justify-between">
+							<span>Mean</span>
+							<span class="font-semibold text-il-storm-30"
+								>{tempStats.temperature ? tempStats.temperature.mean.toFixed(2) : '—'}</span
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Time-series chart -->
+			<div class="border border-il-cloud rounded p-3 bg-white">
+				<div class="font-heading font-semibold text-il-blue text-sm mb-2">
+					Temperature over Time
+				</div>
+				<canvas bind:this={tempChartCanvas}></canvas>
+			</div>
+		{/if}
+	</div>
 </dialog>
 
 <!-- PTD Measurements dialog -->
