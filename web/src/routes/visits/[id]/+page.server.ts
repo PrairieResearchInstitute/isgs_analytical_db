@@ -7,7 +7,8 @@ import {
 	stationVisits,
 	lutStatus,
 	importQueue,
-	pressureTemperatureDepth
+	pressureTemperatureDepth,
+	temperatures
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id);
 	if (isNaN(id)) throw error(404, 'Visit not found');
 
-	const [rows, svRows, statuses, ptdRows] = await Promise.all([
+	const [rows, svRows, statuses, ptdRows, tempRows] = await Promise.all([
 		db
 			.select({
 				id: visits.id,
@@ -66,12 +67,29 @@ export const load: PageServerLoad = async ({ params }) => {
 			.from(pressureTemperatureDepth)
 			.innerJoin(stationVisits, eq(pressureTemperatureDepth.stationVisitId, stationVisits.id))
 			.where(eq(stationVisits.visitId, id))
-			.orderBy(asc(pressureTemperatureDepth.depth))
+			.orderBy(asc(pressureTemperatureDepth.depth)),
+		db
+			.select({
+				id: temperatures.id,
+				stationVisitId: temperatures.stationVisitId,
+				datetime: temperatures.datetime,
+				temperatureCelsius: temperatures.temperatureCelsius
+			})
+			.from(temperatures)
+			.innerJoin(stationVisits, eq(temperatures.stationVisitId, stationVisits.id))
+			.where(eq(stationVisits.visitId, id))
+			.orderBy(asc(temperatures.datetime))
 	]);
 
 	if (rows.length === 0) throw error(404, 'Visit not found');
 
-	return { visit: rows[0], stationVisits: svRows, statuses, ptdRecords: ptdRows };
+	return {
+		visit: rows[0],
+		stationVisits: svRows,
+		statuses,
+		ptdRecords: ptdRows,
+		temperatureRecords: tempRows
+	};
 };
 
 export const actions: Actions = {
