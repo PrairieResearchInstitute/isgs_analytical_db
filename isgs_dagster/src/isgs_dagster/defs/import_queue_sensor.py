@@ -2,10 +2,10 @@ import dagster as dg
 
 from isgs_dagster.resources import PostgresResource
 
-
-@dg.job
-def imported_file():
-    pass
+imported_file = dg.define_asset_job(
+    name="imported_file",
+    selection=["ptd_logger"],
+)
 
 
 @dg.sensor(job=imported_file, minimum_interval_seconds=30)
@@ -34,6 +34,16 @@ def import_queue_sensor(context: dg.SensorEvaluationContext, postgres: PostgresR
         run_requests.append(
             dg.RunRequest(
                 run_key=str(row_id),
+                run_config={
+                    "ops": {
+                        "ptd_logger": {
+                            "config": {
+                                "station_visit_id": station_visit_id,
+                                "uri": uri,
+                            }
+                        }
+                    }
+                },
                 tags={
                     "import_queue_id": str(row_id),
                     "station_visit_id": str(station_visit_id),

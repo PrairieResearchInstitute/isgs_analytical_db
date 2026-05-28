@@ -16,3 +16,4 @@ data/
 
 # Dagster (isgs_dagster/.gitignore covers .env and .venv within that directory)
 isgs_dagster/.dg/
+isgs_dagster/.tmp_dagster_home*

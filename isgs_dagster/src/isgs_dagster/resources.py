@@ -1,3 +1,4 @@
+import boto3
 import psycopg2
 import dagster as dg
 
@@ -13,3 +14,11 @@ class RustFSResource(dg.ConfigurableResource):
     endpoint: str = dg.EnvVar("RUSTFS_ENDPOINT")
     access_key: str = dg.EnvVar("RUSTFS_ACCESS_KEY")
     secret_key: str = dg.EnvVar("RUSTFS_SECRET_KEY")
+
+    def get_s3_client(self):
+        return boto3.client(
+            "s3",
+            endpoint_url=self.endpoint,
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+        )

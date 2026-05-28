@@ -1,6 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import {
+		Chart,
+		ScatterController,
+		LinearScale,
+		PointElement,
+		LineElement,
+		Tooltip,
+		Legend
+	} from 'chart.js';
+
+	Chart.register(ScatterController, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 	let { data }: { data: PageData } = $props();
 
@@ -13,6 +24,128 @@
 	let ptdDialog = $state<HTMLDialogElement | null>(null);
 	let ptdSV = $state<(typeof data.stationVisits)[0] | null>(null);
 	let ptdRows = $derived(data.ptdRecords.filter((r) => r.stationVisitId === ptdSV?.id));
+
+	let pressureCanvas = $state<HTMLCanvasElement | null>(null);
+	let tempCanvas = $state<HTMLCanvasElement | null>(null);
+
+	function calcStats(vals: number[]) {
+		if (!vals.length) return null;
+		const min = Math.min(...vals);
+		const max = Math.max(...vals);
+		const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+		return { min, max, mean, count: vals.length };
+	}
+
+	let ptdStats = $derived.by(() => {
+		const depths = ptdRows.map((r) => r.depth).filter((v): v is number => v != null);
+		const pressures = ptdRows.map((r) => r.pressure).filter((v): v is number => v != null);
+		const temps = ptdRows.map((r) => r.temperature).filter((v): v is number => v != null);
+		return {
+			total: ptdRows.length,
+			depth: calcStats(depths),
+			pressure: calcStats(pressures),
+			temperature: calcStats(temps)
+		};
+	});
+
+	$effect(() => {
+		if (!pressureCanvas || !tempCanvas || !ptdRows.length) return;
+
+		const profilePoints = ptdRows
+			.filter((r) => r.depth != null)
+			.map((r) => ({ depth: r.depth as number, pressure: r.pressure, temperature: r.temperature }))
+			.sort((a, b) => a.depth - b.depth);
+
+		const pressureData = profilePoints
+			.filter((p) => p.pressure != null)
+			.map((p) => ({ x: p.pressure as number, y: p.depth }));
+
+		const tempData = profilePoints
+			.filter((p) => p.temperature != null)
+			.map((p) => ({ x: p.temperature as number, y: p.depth }));
+
+		const sharedYAxis = {
+			reverse: true,
+			title: { display: true, text: 'Depth', color: '#707372' },
+			ticks: { color: '#707372' },
+			grid: { color: '#E8E9EB' }
+		};
+
+		const pChart = new Chart(pressureCanvas, {
+			type: 'scatter',
+			data: {
+				datasets: [
+					{
+						label: 'Pressure',
+						data: pressureData,
+						borderColor: '#13294B',
+						backgroundColor: '#13294B33',
+						pointRadius: pressureData.length > 500 ? 1 : 3,
+						showLine: true,
+						borderWidth: 1.5
+					}
+				]
+			},
+			options: {
+				animation: false,
+				responsive: true,
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						callbacks: { label: (ctx) => `Depth: ${ctx.parsed.y}, Pressure: ${ctx.parsed.x}` }
+					}
+				},
+				scales: {
+					x: {
+						title: { display: true, text: 'Pressure', color: '#707372' },
+						ticks: { color: '#707372' },
+						grid: { color: '#E8E9EB' }
+					},
+					y: sharedYAxis
+				}
+			}
+		});
+
+		const tChart = new Chart(tempCanvas, {
+			type: 'scatter',
+			data: {
+				datasets: [
+					{
+						label: 'Temperature',
+						data: tempData,
+						borderColor: '#E84A27',
+						backgroundColor: '#E84A2733',
+						pointRadius: tempData.length > 500 ? 1 : 3,
+						showLine: true,
+						borderWidth: 1.5
+					}
+				]
+			},
+			options: {
+				animation: false,
+				responsive: true,
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						callbacks: { label: (ctx) => `Depth: ${ctx.parsed.y}, Temp: ${ctx.parsed.x}` }
+					}
+				},
+				scales: {
+					x: {
+						title: { display: true, text: 'Temperature', color: '#707372' },
+						ticks: { color: '#707372' },
+						grid: { color: '#E8E9EB' }
+					},
+					y: sharedYAxis
+				}
+			}
+		});
+
+		return () => {
+			pChart.destroy();
+			tChart.destroy();
+		};
+	});
 
 	function openEditSV(sv: (typeof data.stationVisits)[0]) {
 		editingSV = sv;
@@ -442,7 +575,7 @@
 <dialog
 	bind:this={ptdDialog}
 	onclick={onPtdDialogClick}
-	class="w-full max-w-2xl rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
+	class="w-full max-w-4xl rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
 >
 	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
 		<h2 class="font-heading font-bold text-xl text-il-blue">
@@ -458,153 +591,56 @@
 		</button>
 	</div>
 
-	<div class="px-6 py-5 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
-		<!-- Editable measurements table -->
-		<div class="border border-il-cloud rounded overflow-hidden">
-			<table class="w-full text-sm font-sans">
-				<thead class="bg-il-blue text-white">
-					<tr>
-						<th class="text-left px-3 py-2 font-heading font-semibold tracking-wide">Depth</th>
-						<th class="text-left px-3 py-2 font-heading font-semibold tracking-wide">Pressure</th>
-						<th class="text-left px-3 py-2 font-heading font-semibold tracking-wide">Temperature</th
-						>
-						<th class="px-3 py-2"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each ptdRows as row (row.id)}
-						<tr
-							class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
-						>
-							<td class="px-3 py-2">
-								<input
-									type="number"
-									name="depth"
-									step="any"
-									value={row.depth ?? ''}
-									form="ptd-save-{row.id}"
-									class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
-								/>
-							</td>
-							<td class="px-3 py-2">
-								<input
-									type="number"
-									name="pressure"
-									step="any"
-									value={row.pressure ?? ''}
-									form="ptd-save-{row.id}"
-									class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
-								/>
-							</td>
-							<td class="px-3 py-2">
-								<input
-									type="number"
-									name="temperature"
-									step="any"
-									value={row.temperature ?? ''}
-									form="ptd-save-{row.id}"
-									class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
-								/>
-							</td>
-							<td class="px-3 py-2 whitespace-nowrap">
-								<button
-									type="submit"
-									form="ptd-save-{row.id}"
-									class="text-il-blue hover:underline text-sm font-sans font-semibold mr-3"
+	<div class="px-6 py-5 flex flex-col gap-6 overflow-y-auto max-h-[80vh]">
+		{#if ptdRows.length === 0}
+			<p class="text-il-storm font-sans text-sm text-center py-8">No PTD data for this visit.</p>
+		{:else}
+			<!-- Summary statistics -->
+			<div class="grid grid-cols-3 gap-4">
+				{#each [{ label: 'Depth', stats: ptdStats.depth }, { label: 'Pressure', stats: ptdStats.pressure }, { label: 'Temperature', stats: ptdStats.temperature }] as col}
+					<div class="border border-il-cloud rounded p-4 bg-il-storm-95">
+						<div class="font-heading font-semibold text-il-blue text-sm mb-2">{col.label}</div>
+						<div class="text-xs font-sans text-il-storm space-y-1">
+							<div class="flex justify-between">
+								<span>Records</span>
+								<span class="font-semibold text-il-storm-30">{col.stats?.count ?? '—'}</span>
+							</div>
+							<div class="flex justify-between">
+								<span>Min</span>
+								<span class="font-semibold text-il-storm-30"
+									>{col.stats ? col.stats.min.toFixed(2) : '—'}</span
 								>
-									Save
-								</button>
-								<button
-									type="submit"
-									form="ptd-del-{row.id}"
-									class="text-red-600 hover:underline text-sm font-sans font-semibold"
+							</div>
+							<div class="flex justify-between">
+								<span>Max</span>
+								<span class="font-semibold text-il-storm-30"
+									>{col.stats ? col.stats.max.toFixed(2) : '—'}</span
 								>
-									Delete
-								</button>
-							</td>
-						</tr>
-					{/each}
+							</div>
+							<div class="flex justify-between">
+								<span>Mean</span>
+								<span class="font-semibold text-il-storm-30"
+									>{col.stats ? col.stats.mean.toFixed(2) : '—'}</span
+								>
+							</div>
+						</div>
+					</div>
+				{/each}
+			</div>
 
-					<!-- Add row form rendered inline at bottom of table -->
-					<tr class="border-t-2 border-il-cloud bg-il-storm-95">
-						<td class="px-3 py-2">
-							<input
-								type="number"
-								name="depth"
-								step="any"
-								form="ptd-add"
-								placeholder="Depth"
-								class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
-							/>
-						</td>
-						<td class="px-3 py-2">
-							<input
-								type="number"
-								name="pressure"
-								step="any"
-								form="ptd-add"
-								placeholder="Pressure"
-								class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
-							/>
-						</td>
-						<td class="px-3 py-2">
-							<input
-								type="number"
-								name="temperature"
-								step="any"
-								form="ptd-add"
-								placeholder="Temperature"
-								class="w-full border border-il-cloud rounded px-2 py-1 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-1 focus:ring-il-blue"
-							/>
-						</td>
-						<td class="px-3 py-2">
-							<button
-								type="submit"
-								form="ptd-add"
-								class="text-il-blue hover:underline text-sm font-sans font-semibold whitespace-nowrap"
-							>
-								+ Add row
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
-		<!-- Per-row save/delete forms (placed outside table to satisfy HTML5) -->
-		{#each ptdRows as row (row.id)}
-			<form
-				id="ptd-save-{row.id}"
-				method="POST"
-				action="?/updatePtd"
-				use:enhance={() =>
-					({ update }) =>
-						update({ invalidateAll: true })}
-			>
-				<input type="hidden" name="ptdId" value={row.id} />
-			</form>
-			<form
-				id="ptd-del-{row.id}"
-				method="POST"
-				action="?/deletePtd"
-				use:enhance={() =>
-					({ update }) =>
-						update({ invalidateAll: true })}
-			>
-				<input type="hidden" name="ptdId" value={row.id} />
-			</form>
-		{/each}
-
-		<!-- Add row form (also outside table) -->
-		<form
-			id="ptd-add"
-			method="POST"
-			action="?/addPtd"
-			use:enhance={() =>
-				({ update, formElement }) =>
-					update({ invalidateAll: true }).then(() => formElement.reset())}
-		>
-			<input type="hidden" name="stationVisitId" value={ptdSV?.id ?? ''} />
-		</form>
+			<!-- Depth profile charts -->
+			<div class="flex flex-wrap gap-4">
+				<div class="flex-1 min-w-60 border border-il-cloud rounded p-3 bg-white">
+					<div class="font-heading font-semibold text-il-blue text-sm mb-2">Pressure Profile</div>
+					<canvas bind:this={pressureCanvas}></canvas>
+				</div>
+				<div class="flex-1 min-w-60 border border-il-cloud rounded p-3 bg-white">
+					<div class="font-heading font-semibold text-il-blue text-sm mb-2">
+						Temperature Profile
+					</div>
+					<canvas bind:this={tempCanvas}></canvas>
+				</div>
+			</div>
+		{/if}
 	</div>
 </dialog>
