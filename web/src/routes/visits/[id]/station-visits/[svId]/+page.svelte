@@ -23,6 +23,21 @@
 	let tempCanvas = $state<HTMLCanvasElement | null>(null);
 	let tempChartCanvas = $state<HTMLCanvasElement | null>(null);
 
+	let sampleDialog = $state<HTMLDialogElement | null>(null);
+	let editingSample = $state<(typeof data.samples)[0] | null>(null);
+
+	function onSampleDialogClick(e: MouseEvent) {
+		if (e.target === sampleDialog) sampleDialog?.close();
+	}
+	function openAddSample() {
+		editingSample = null;
+		sampleDialog?.showModal();
+	}
+	function openEditSample(s: (typeof data.samples)[0]) {
+		editingSample = s;
+		sampleDialog?.showModal();
+	}
+
 	function calcStats(vals: number[]) {
 		if (!vals.length) return null;
 		const min = Math.min(...vals);
@@ -433,6 +448,59 @@
 	</form>
 </div>
 
+<!-- Samples section -->
+<div class="mb-8">
+	<div class="flex items-center justify-between mb-4">
+		<h2 class="font-heading font-bold text-xl text-il-blue">Samples</h2>
+		<button
+			type="button"
+			onclick={openAddSample}
+			class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
+		>
+			+ Add Sample
+		</button>
+	</div>
+	{#if data.samples.length === 0}
+		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
+			No samples recorded for this visit.
+		</div>
+	{:else}
+		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
+			<div class="overflow-y-auto max-h-[440px]">
+				<table class="w-full text-sm font-sans">
+					<thead class="bg-il-blue text-white sticky top-0 z-10">
+						<tr>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
+								>Sample Name</th
+							>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
+							<th class="px-4 py-3"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.samples as sample (sample.id)}
+							<tr
+								class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
+							>
+								<td class="px-4 py-3 font-semibold text-il-storm-30">{sample.sampleName ?? '—'}</td>
+								<td class="px-4 py-3 text-il-storm">{sample.notes ?? '—'}</td>
+								<td class="px-4 py-3">
+									<button
+										type="button"
+										onclick={() => openEditSample(sample)}
+										class="text-xs font-sans font-semibold text-il-blue hover:underline"
+										>Edit</button
+									>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{/if}
+</div>
+
 <!-- PTD section -->
 {#if data.ptdRecords.length > 0}
 	<div class="mb-8">
@@ -529,3 +597,99 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Sample dialog -->
+<dialog
+	bind:this={sampleDialog}
+	onclick={onSampleDialogClick}
+	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
+>
+	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
+		<h2 class="font-heading font-bold text-xl text-il-blue">
+			{editingSample ? 'Edit Sample' : 'Add Sample'}
+		</h2>
+		<button
+			type="button"
+			onclick={() => sampleDialog?.close()}
+			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
+			aria-label="Close">&times;</button
+		>
+	</div>
+
+	<form
+		method="POST"
+		action={editingSample ? '?/updateSample' : '?/addSample'}
+		use:enhance={() =>
+			({ update }) =>
+				update().then(() => sampleDialog?.close())}
+		class="px-6 py-5 flex flex-col gap-4"
+	>
+		{#if editingSample}
+			<input type="hidden" name="sampleId" value={editingSample.id} />
+		{/if}
+
+		<div class="flex flex-col gap-1">
+			<label
+				for="sampleName"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
+				Sample Name
+			</label>
+			<input
+				id="sampleName"
+				name="sampleName"
+				type="text"
+				maxlength="32"
+				value={editingSample?.sampleName ?? ''}
+				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
+			/>
+		</div>
+
+		<div class="flex flex-col gap-1">
+			<label
+				for="sampleNotes"
+				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
+			>
+				Notes
+			</label>
+			<textarea
+				id="sampleNotes"
+				name="notes"
+				rows={3}
+				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-y"
+				>{editingSample?.notes ?? ''}</textarea
+			>
+		</div>
+
+		<div class="flex items-center justify-between pt-2">
+			<button
+				type="button"
+				onclick={() => sampleDialog?.close()}
+				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
+				>Cancel</button
+			>
+			<button
+				type="submit"
+				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
+				>Save</button
+			>
+		</div>
+	</form>
+
+	{#if editingSample}
+		<div class="px-6 pb-5">
+			<form
+				method="POST"
+				action="?/deleteSample"
+				use:enhance={() =>
+					({ update }) =>
+						update().then(() => sampleDialog?.close())}
+			>
+				<input type="hidden" name="sampleId" value={editingSample.id} />
+				<button type="submit" class="text-xs font-sans font-semibold text-red-600 hover:underline"
+					>Delete sample</button
+				>
+			</form>
+		</div>
+	{/if}
+</dialog>

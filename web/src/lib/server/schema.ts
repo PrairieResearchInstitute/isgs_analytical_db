@@ -6,7 +6,8 @@ import {
 	serial,
 	real,
 	time,
-	timestamp
+	timestamp,
+	varchar
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -207,3 +208,15 @@ export const importQueue = pgTable('import_queue', {
 
 export type ImportQueueEntry = typeof importQueue.$inferSelect;
 export type NewImportQueueEntry = typeof importQueue.$inferInsert;
+
+export const samples = pgTable('samples', {
+	id: serial('id').primaryKey(),
+	stationVisitId: integer('station_visit_id')
+		.notNull()
+		.references(() => stationVisits.id),
+	sampleName: varchar('sample_name', { length: 32 }),
+	notes: text('notes')
+});
+
+export type Sample = typeof samples.$inferSelect;
+export type NewSample = typeof samples.$inferInsert;

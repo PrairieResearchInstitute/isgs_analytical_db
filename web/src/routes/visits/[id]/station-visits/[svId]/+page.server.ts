@@ -6,7 +6,8 @@ import {
 	lutStatus,
 	importQueue,
 	pressureTemperatureDepth,
-	temperatures
+	temperatures,
+	samples
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const svId = parseInt(params.svId);
 	if (isNaN(visitId) || isNaN(svId)) throw error(404, 'Not found');
 
-	const [visitRows, svRows, statuses, ptdRows, tempRows] = await Promise.all([
+	const [visitRows, svRows, statuses, ptdRows, tempRows, sampleRows] = await Promise.all([
 		db.select({ id: visits.id, dt: visits.dt }).from(visits).where(eq(visits.id, visitId)).limit(1),
 		db
 			.select({
@@ -58,7 +59,12 @@ export const load: PageServerLoad = async ({ params }) => {
 			})
 			.from(temperatures)
 			.where(eq(temperatures.stationVisitId, svId))
-			.orderBy(asc(temperatures.datetime))
+			.orderBy(asc(temperatures.datetime)),
+		db
+			.select()
+			.from(samples)
+			.where(eq(samples.stationVisitId, svId))
+			.orderBy(asc(samples.sampleName))
 	]);
 
 	if (visitRows.length === 0) throw error(404, 'Visit not found');
@@ -69,7 +75,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		stationVisit: svRows[0],
 		statuses,
 		ptdRecords: ptdRows,
-		temperatureRecords: tempRows
+		temperatureRecords: tempRows,
+		samples: sampleRows
 	};
 };
 
@@ -155,6 +162,37 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const ptdId = parseInt(data.get('ptdId') as string);
 		await db.delete(pressureTemperatureDepth).where(eq(pressureTemperatureDepth.id, ptdId));
+		return {};
+	},
+
+	addSample: async ({ request, params }) => {
+		const svId = parseInt(params.svId);
+		const data = await request.formData();
+		await db.insert(samples).values({
+			stationVisitId: svId,
+			sampleName: (data.get('sampleName') as string) || null,
+			notes: (data.get('notes') as string) || null
+		});
+		return {};
+	},
+
+	updateSample: async ({ request }) => {
+		const data = await request.formData();
+		const sampleId = parseInt(data.get('sampleId') as string);
+		await db
+			.update(samples)
+			.set({
+				sampleName: (data.get('sampleName') as string) || null,
+				notes: (data.get('notes') as string) || null
+			})
+			.where(eq(samples.id, sampleId));
+		return {};
+	},
+
+	deleteSample: async ({ request }) => {
+		const data = await request.formData();
+		const sampleId = parseInt(data.get('sampleId') as string);
+		await db.delete(samples).where(eq(samples.id, sampleId));
 		return {};
 	}
 };
