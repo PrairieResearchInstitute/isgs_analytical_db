@@ -9,7 +9,7 @@ imported_file = dg.define_asset_job(
 
 
 @dg.sensor(job=imported_file, minimum_interval_seconds=30)
-def import_queue_sensor(context: dg.SensorEvaluationContext, postgres: PostgresResource):
+def station_visit_import_queue_sensor(context: dg.SensorEvaluationContext, postgres: PostgresResource):
     last_timestamp = context.cursor or "1970-01-01T00:00:00"
 
     with postgres.get_connection() as conn:
@@ -17,7 +17,7 @@ def import_queue_sensor(context: dg.SensorEvaluationContext, postgres: PostgresR
             cur.execute(
                 """
                 SELECT id, station_visit_id, uri, timestamp
-                FROM import_queue
+                FROM station_visit_import_queue
                 WHERE timestamp > %s
                 ORDER BY timestamp ASC
                 """,
@@ -45,7 +45,7 @@ def import_queue_sensor(context: dg.SensorEvaluationContext, postgres: PostgresR
                     }
                 },
                 tags={
-                    "import_queue_id": str(row_id),
+                    "station_visit_import_queue_id": str(row_id),
                     "station_visit_id": str(station_visit_id),
                     "uri": uri,
                 },

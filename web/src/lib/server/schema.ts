@@ -7,7 +7,8 @@ import {
 	real,
 	time,
 	timestamp,
-	varchar
+	varchar,
+	foreignKey
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -171,15 +172,23 @@ export const stationVisits = pgTable('station_visits', {
 export type StationVisit = typeof stationVisits.$inferSelect;
 export type NewStationVisit = typeof stationVisits.$inferInsert;
 
-export const pressureTemperatureDepth = pgTable('pressure_temperature_depth', {
-	id: serial('id').primaryKey(),
-	stationVisitId: integer('station_visit_id')
-		.notNull()
-		.references(() => stationVisits.id),
-	pressure: real('pressure'),
-	temperature: real('temperature'),
-	depth: real('depth')
-});
+export const pressureTemperatureDepth = pgTable(
+	'pressure_temperature_depth',
+	{
+		id: serial('id').primaryKey(),
+		stationVisitId: integer('station_visit_id').notNull(),
+		pressure: real('pressure'),
+		temperature: real('temperature'),
+		depth: real('depth')
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.stationVisitId],
+			foreignColumns: [stationVisits.id],
+			name: 'ptd_station_visit_id_fk'
+		})
+	]
+);
 
 export type PressureTemperatureDepth = typeof pressureTemperatureDepth.$inferSelect;
 export type NewPressureTemperatureDepth = typeof pressureTemperatureDepth.$inferInsert;
@@ -197,17 +206,25 @@ export const temperatures = pgTable('temperatures', {
 export type Temperature = typeof temperatures.$inferSelect;
 export type NewTemperature = typeof temperatures.$inferInsert;
 
-export const importQueue = pgTable('import_queue', {
-	id: serial('id').primaryKey(),
-	stationVisitId: integer('station_visit_id')
-		.notNull()
-		.references(() => stationVisits.id),
-	uri: text('uri').notNull(),
-	timestamp: timestamp('timestamp').notNull().defaultNow()
-});
+export const stationVisitImportQueue = pgTable(
+	'station_visit_import_queue',
+	{
+		id: serial('id').primaryKey(),
+		stationVisitId: integer('station_visit_id').notNull(),
+		uri: text('uri').notNull(),
+		timestamp: timestamp('timestamp').notNull().defaultNow()
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.stationVisitId],
+			foreignColumns: [stationVisits.id],
+			name: 'sviq_station_visit_id_fk'
+		})
+	]
+);
 
-export type ImportQueueEntry = typeof importQueue.$inferSelect;
-export type NewImportQueueEntry = typeof importQueue.$inferInsert;
+export type StationVisitImportQueueEntry = typeof stationVisitImportQueue.$inferSelect;
+export type NewStationVisitImportQueueEntry = typeof stationVisitImportQueue.$inferInsert;
 
 export const samples = pgTable('samples', {
 	id: serial('id').primaryKey(),
@@ -220,3 +237,23 @@ export const samples = pgTable('samples', {
 
 export type Sample = typeof samples.$inferSelect;
 export type NewSample = typeof samples.$inferInsert;
+
+export const visitLabsImportQueue = pgTable(
+	'visit_labs_import_queue',
+	{
+		id: serial('id').primaryKey(),
+		visitId: integer('visit_id').notNull(),
+		uri: text('uri').notNull(),
+		timestamp: timestamp('timestamp').notNull().defaultNow()
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.visitId],
+			foreignColumns: [visits.id],
+			name: 'vliq_visit_id_fk'
+		})
+	]
+);
+
+export type VisitLabsImportQueueEntry = typeof visitLabsImportQueue.$inferSelect;
+export type NewVisitLabsImportQueueEntry = typeof visitLabsImportQueue.$inferInsert;

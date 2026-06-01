@@ -4,7 +4,7 @@ import {
 	stations,
 	stationVisits,
 	lutStatus,
-	importQueue,
+	stationVisitImportQueue,
 	pressureTemperatureDepth,
 	temperatures,
 	samples
@@ -105,7 +105,7 @@ export const actions: Actions = {
 				})
 			);
 			await db
-				.insert(importQueue)
+				.insert(stationVisitImportQueue)
 				.values(keys.map((key) => ({ stationVisitId: svId, uri: `s3://watershed/${key}` })));
 		}
 
