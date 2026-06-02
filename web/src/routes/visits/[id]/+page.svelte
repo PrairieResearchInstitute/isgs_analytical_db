@@ -5,6 +5,31 @@
 	let { data }: { data: PageData } = $props();
 
 	let editDialog = $state<HTMLDialogElement | null>(null);
+	let selectedFiles = $state<File[]>([]);
+	let isDragging = $state(false);
+	let fileInput = $state<HTMLInputElement | null>(null);
+
+	function addFiles(incoming: FileList | File[]) {
+		const next = [...selectedFiles];
+		for (const f of incoming) {
+			if (
+				/\.(xls|xlsx)$/i.test(f.name) &&
+				!next.some((x) => x.name === f.name && x.size === f.size)
+			)
+				next.push(f);
+		}
+		selectedFiles = next;
+	}
+
+	function removeFile(index: number) {
+		selectedFiles = selectedFiles.filter((_, i) => i !== index);
+	}
+
+	function formatBytes(bytes: number): string {
+		if (bytes < 1024) return `${bytes} B`;
+		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
 
 	function openEdit() {
 		editDialog?.showModal();
@@ -141,6 +166,111 @@
 			</div>
 		{/if}
 	</dl>
+</div>
+
+<!-- Lab Results section -->
+<div class="mt-8">
+	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Lab Results</h2>
+	<form
+		method="POST"
+		action="?/importLabs"
+		enctype="multipart/form-data"
+		use:enhance={(e) => {
+			for (const file of selectedFiles) e.formData.append('files', file);
+			return ({ update }) =>
+				update().then(() => {
+					selectedFiles = [];
+				});
+		}}
+		class="flex flex-col gap-3 max-w-lg"
+	>
+		<!-- Drop zone -->
+		<div
+			role="button"
+			tabindex="0"
+			onclick={() => fileInput?.click()}
+			onkeydown={(e) => e.key === 'Enter' && fileInput?.click()}
+			ondragover={(e) => {
+				e.preventDefault();
+				isDragging = true;
+			}}
+			ondragleave={() => (isDragging = false)}
+			ondrop={(e) => {
+				e.preventDefault();
+				isDragging = false;
+				if (e.dataTransfer?.files) addFiles(e.dataTransfer.files);
+			}}
+			class="border-2 border-dashed rounded px-4 py-6 flex flex-col items-center gap-1 cursor-pointer transition-colors
+			       {isDragging
+				? 'border-il-blue bg-il-storm-95'
+				: 'border-il-cloud hover:border-il-blue hover:bg-il-storm-95'}"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="w-7 h-7 text-il-storm"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+				stroke-width="1.5"
+				aria-hidden="true"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+				/>
+			</svg>
+			<span class="text-sm font-sans text-il-storm">
+				Drop Excel files here or <span class="text-il-blue font-semibold">Browse</span>
+			</span>
+			<span class="text-xs font-sans text-il-storm opacity-60">.xls and .xlsx only</span>
+		</div>
+
+		<input
+			bind:this={fileInput}
+			type="file"
+			accept=".xls,.xlsx"
+			multiple
+			class="sr-only"
+			onchange={(e) => {
+				const input = e.currentTarget as HTMLInputElement;
+				if (input.files) addFiles(input.files);
+				input.value = '';
+			}}
+		/>
+
+		<!-- Selected file list -->
+		{#if selectedFiles.length > 0}
+			<ul class="flex flex-col gap-1">
+				{#each selectedFiles as file, i (file.name + file.size)}
+					<li
+						class="flex items-center justify-between text-sm font-sans px-3 py-1.5 rounded bg-il-storm-95 border border-il-cloud"
+					>
+						<span class="truncate text-il-storm-30 mr-2">{file.name}</span>
+						<span class="shrink-0 flex items-center gap-2 text-il-storm text-xs">
+							{formatBytes(file.size)}
+							<button
+								type="button"
+								onclick={() => removeFile(i)}
+								class="text-il-storm hover:text-red-600 font-bold leading-none"
+								aria-label="Remove {file.name}">&times;</button
+							>
+						</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+
+		<div class="flex pt-1">
+			<button
+				type="submit"
+				disabled={selectedFiles.length === 0}
+				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+			>
+				Import
+			</button>
+		</div>
+	</form>
 </div>
 
 <!-- Edit dialog -->
