@@ -71,8 +71,8 @@ def test_parse_diver_rows_station_visit_id_propagated():
 def test_parse_ins_rows_basic():
     rows = parse_ins_rows(INS_SNIPPET, station_visit_id=3)
     assert len(rows) == 2
-    assert rows[0] == (3, 0.596, 12.248, 0.419)
-    assert rows[1] == (3, 0.594, 11.896, 0.418)
+    assert rows[0] == (3, datetime(2024, 4, 20, 10, 0, 0), 0.596, 12.248, 0.419)
+    assert rows[1] == (3, datetime(2024, 4, 20, 11, 0, 0), 0.594, 11.896, 0.418)
 
 
 def test_parse_ins_rows_station_visit_id_propagated():

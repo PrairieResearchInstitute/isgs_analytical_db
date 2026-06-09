@@ -43,13 +43,14 @@ export const load: PageServerLoad = async ({ params }) => {
 			.select({
 				id: pressureTemperatureDepth.id,
 				stationVisitId: pressureTemperatureDepth.stationVisitId,
+				timestamp: pressureTemperatureDepth.timestamp,
 				pressure: pressureTemperatureDepth.pressure,
 				temperature: pressureTemperatureDepth.temperature,
 				depth: pressureTemperatureDepth.depth
 			})
 			.from(pressureTemperatureDepth)
 			.where(eq(pressureTemperatureDepth.stationVisitId, svId))
-			.orderBy(asc(pressureTemperatureDepth.depth)),
+			.orderBy(asc(pressureTemperatureDepth.timestamp)),
 		db
 			.select({
 				id: temperatures.id,

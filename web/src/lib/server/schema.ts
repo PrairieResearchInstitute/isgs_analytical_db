@@ -177,6 +177,7 @@ export const pressureTemperatureDepth = pgTable(
 	{
 		id: serial('id').primaryKey(),
 		stationVisitId: integer('station_visit_id').notNull(),
+		timestamp: timestamp('timestamp', { withTimezone: false }),
 		pressure: real('pressure'),
 		temperature: real('temperature'),
 		depth: real('depth')

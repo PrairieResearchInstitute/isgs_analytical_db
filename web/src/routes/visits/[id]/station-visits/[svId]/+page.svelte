@@ -19,9 +19,10 @@
 	let isDragging = $state(false);
 	let fileInput = $state<HTMLInputElement | null>(null);
 
-	let pressureCanvas = $state<HTMLCanvasElement | null>(null);
-	let tempCanvas = $state<HTMLCanvasElement | null>(null);
+	let pressureChartCanvas = $state<HTMLCanvasElement | null>(null);
 	let tempChartCanvas = $state<HTMLCanvasElement | null>(null);
+	let depthChartCanvas = $state<HTMLCanvasElement | null>(null);
+	let diverTempCanvas = $state<HTMLCanvasElement | null>(null);
 
 	let sampleDialog = $state<HTMLDialogElement | null>(null);
 	let editingSample = $state<(typeof data.samples)[0] | null>(null);
@@ -66,112 +67,102 @@
 	});
 
 	$effect(() => {
-		if (!pressureCanvas || !tempCanvas || !data.ptdRecords.length) return;
+		if (!pressureChartCanvas || !tempChartCanvas || !depthChartCanvas || !data.ptdRecords.length)
+			return;
 
-		const profilePoints = data.ptdRecords
-			.filter((r) => r.depth != null)
-			.map((r) => ({ depth: r.depth as number, pressure: r.pressure, temperature: r.temperature }))
-			.sort((a, b) => a.depth - b.depth);
+		const toMs = (r: (typeof data.ptdRecords)[0]) =>
+			r.timestamp ? new Date(r.timestamp).getTime() : null;
 
-		const pressureData = profilePoints
-			.filter((p) => p.pressure != null)
-			.map((p) => ({ x: p.pressure as number, y: p.depth }));
-
-		const tempData = profilePoints
-			.filter((p) => p.temperature != null)
-			.map((p) => ({ x: p.temperature as number, y: p.depth }));
-
-		const sharedYAxis = {
-			reverse: true,
-			title: { display: true, text: 'Depth', color: '#707372' },
-			ticks: { color: '#707372' },
+		const sharedXAxis = {
+			title: { display: true, text: 'Time', color: '#707372' },
+			ticks: {
+				color: '#707372',
+				callback: (val: number | string) => new Date(val as number).toLocaleDateString()
+			},
 			grid: { color: '#E8E9EB' }
 		};
 
-		const pChart = new Chart(pressureCanvas, {
-			type: 'scatter',
-			data: {
-				datasets: [
-					{
-						label: 'Pressure',
-						data: pressureData,
-						borderColor: '#13294B',
-						backgroundColor: '#13294B33',
-						pointRadius: pressureData.length > 500 ? 1 : 3,
-						showLine: true,
-						borderWidth: 1.5
-					}
-				]
-			},
-			options: {
-				animation: false,
-				responsive: true,
-				plugins: {
-					legend: { display: false },
-					tooltip: {
-						callbacks: { label: (ctx) => `Depth: ${ctx.parsed.y}, Pressure: ${ctx.parsed.x}` }
-					}
-				},
-				scales: {
-					x: {
-						title: { display: true, text: 'Pressure', color: '#707372' },
-						ticks: { color: '#707372' },
-						grid: { color: '#E8E9EB' }
-					},
-					y: sharedYAxis
-				}
-			}
-		});
+		function makeChart(
+			canvas: HTMLCanvasElement,
+			label: string,
+			color: string,
+			yField: (r: (typeof data.ptdRecords)[0]) => number | null | undefined,
+			yLabel: string
+		) {
+			const chartData = data.ptdRecords
+				.filter((r) => toMs(r) != null && yField(r) != null)
+				.map((r) => ({ x: toMs(r) as number, y: yField(r) as number }));
 
-		const tChart = new Chart(tempCanvas, {
-			type: 'scatter',
-			data: {
-				datasets: [
-					{
-						label: 'Temperature',
-						data: tempData,
-						borderColor: '#E84A27',
-						backgroundColor: '#E84A2733',
-						pointRadius: tempData.length > 500 ? 1 : 3,
-						showLine: true,
-						borderWidth: 1.5
-					}
-				]
-			},
-			options: {
-				animation: false,
-				responsive: true,
-				plugins: {
-					legend: { display: false },
-					tooltip: {
-						callbacks: { label: (ctx) => `Depth: ${ctx.parsed.y}, Temp: ${ctx.parsed.x}` }
-					}
+			return new Chart(canvas, {
+				type: 'scatter',
+				data: {
+					datasets: [
+						{
+							label,
+							data: chartData,
+							borderColor: color,
+							backgroundColor: color + '33',
+							pointRadius: chartData.length > 500 ? 1 : 3,
+							showLine: true,
+							borderWidth: 1.5
+						}
+					]
 				},
-				scales: {
-					x: {
-						title: { display: true, text: 'Temperature', color: '#707372' },
-						ticks: { color: '#707372' },
-						grid: { color: '#E8E9EB' }
+				options: {
+					animation: false,
+					responsive: true,
+					plugins: {
+						legend: { display: false },
+						tooltip: {
+							callbacks: {
+								label: (ctx) =>
+									`${new Date(ctx.parsed.x!).toLocaleString()}: ${ctx.parsed.y!.toFixed(3)}`
+							}
+						}
 					},
-					y: sharedYAxis
+					scales: {
+						x: sharedXAxis,
+						y: {
+							title: { display: true, text: yLabel, color: '#707372' },
+							ticks: { color: '#707372' },
+							grid: { color: '#E8E9EB' }
+						}
+					}
 				}
-			}
-		});
+			});
+		}
+
+		const pChart = makeChart(
+			pressureChartCanvas,
+			'Pressure',
+			'#13294B',
+			(r) => r.pressure,
+			'Pressure (psi)'
+		);
+		const tChart = makeChart(
+			tempChartCanvas,
+			'Temperature',
+			'#E84A27',
+			(r) => r.temperature,
+			'Temperature (°C)'
+		);
+		const dChart = makeChart(depthChartCanvas, 'Depth', '#1f7a4f', (r) => r.depth, 'Depth (m)');
 
 		return () => {
 			pChart.destroy();
 			tChart.destroy();
+			dChart.destroy();
 		};
 	});
 
 	$effect(() => {
-		if (!tempChartCanvas || !data.temperatureRecords.length) return;
+		if (!diverTempCanvas || !data.temperatureRecords.length) return;
 
 		const chartData = data.temperatureRecords
 			.filter((r) => r.datetime != null && r.temperatureCelsius != null)
 			.map((r) => ({ x: new Date(r.datetime!).getTime(), y: r.temperatureCelsius as number }));
 
-		const chart = new Chart(tempChartCanvas, {
+		const chart = new Chart(diverTempCanvas, {
 			type: 'scatter',
 			data: {
 				datasets: [
@@ -539,15 +530,21 @@
 			{/each}
 		</div>
 
-		<!-- Depth profile charts -->
+		<!-- Time-series charts -->
 		<div class="flex flex-wrap gap-4">
 			<div class="flex-1 min-w-60 border border-il-cloud rounded p-3 bg-white">
-				<div class="font-heading font-semibold text-il-blue text-sm mb-2">Pressure Profile</div>
-				<canvas bind:this={pressureCanvas}></canvas>
+				<div class="font-heading font-semibold text-il-blue text-sm mb-2">Pressure over Time</div>
+				<canvas bind:this={pressureChartCanvas}></canvas>
 			</div>
 			<div class="flex-1 min-w-60 border border-il-cloud rounded p-3 bg-white">
-				<div class="font-heading font-semibold text-il-blue text-sm mb-2">Temperature Profile</div>
-				<canvas bind:this={tempCanvas}></canvas>
+				<div class="font-heading font-semibold text-il-blue text-sm mb-2">
+					Temperature over Time
+				</div>
+				<canvas bind:this={tempChartCanvas}></canvas>
+			</div>
+			<div class="flex-1 min-w-60 border border-il-cloud rounded p-3 bg-white">
+				<div class="font-heading font-semibold text-il-blue text-sm mb-2">Depth over Time</div>
+				<canvas bind:this={depthChartCanvas}></canvas>
 			</div>
 		</div>
 	</div>
@@ -593,7 +590,7 @@
 		<!-- Time-series chart -->
 		<div class="border border-il-cloud rounded p-3 bg-white">
 			<div class="font-heading font-semibold text-il-blue text-sm mb-2">Temperature over Time</div>
-			<canvas bind:this={tempChartCanvas}></canvas>
+			<canvas bind:this={diverTempCanvas}></canvas>
 		</div>
 	</div>
 {/if}

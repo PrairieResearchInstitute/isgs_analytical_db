@@ -42,8 +42,10 @@ def parse_ins_rows(content: str, station_visit_id: int) -> list[tuple]:
                 header_found = True
             continue
         if len(row) >= 4:
+            ts = datetime.strptime(row[0].strip(), "%Y-%m-%d %H:%M:%S.%f")
             rows.append((
                 station_visit_id,
+                ts,
                 float(row[1]),
                 float(row[2]),
                 float(row[3]),
@@ -89,8 +91,8 @@ def data_logger(
                 )
                 cur.executemany(
                     "INSERT INTO pressure_temperature_depth "
-                    "(station_visit_id, pressure, temperature, depth) "
-                    "VALUES (%s, %s, %s, %s)",
+                    "(station_visit_id, timestamp, pressure, temperature, depth) "
+                    "VALUES (%s, %s, %s, %s, %s)",
                     rows,
                 )
         conn.commit()
