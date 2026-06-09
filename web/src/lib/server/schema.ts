@@ -8,7 +8,6 @@ import {
 	time,
 	timestamp,
 	varchar,
-	char,
 	foreignKey
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -258,23 +257,3 @@ export const visitLabsImportQueue = pgTable(
 
 export type VisitLabsImportQueueEntry = typeof visitLabsImportQueue.$inferSelect;
 export type NewVisitLabsImportQueueEntry = typeof visitLabsImportQueue.$inferInsert;
-
-export const labResults = pgTable('lab_result', {
-	id: serial('id').primaryKey(),
-	sampleId: integer('sample_id')
-		.notNull()
-		.references(() => samples.id),
-	labName: varchar('lab_name', { length: 15 }),
-	analyticalBatch: varchar('analytical_batch', { length: 10 }),
-	date: timestamp('date'),
-	qcType: varchar('qc_type', { length: 3 }),
-	parameterName: varchar('parameter_name', { length: 64 }),
-	resultQualifier: char('result_qualifier', { length: 1 }),
-	resultRecovery: real('result_recovery'),
-	corrResultRecovery: real('corr_result_recovery'),
-	unit: varchar('unit', { length: 8 }),
-	note: text('note')
-});
-
-export type LabResult = typeof labResults.$inferSelect;
-export type NewLabResult = typeof labResults.$inferInsert;
