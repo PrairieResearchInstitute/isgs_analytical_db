@@ -5,13 +5,11 @@ import {
 	lutcInitials,
 	stations,
 	stationVisits,
-	lutStatus,
-	visitLabsImportQueue
+	lutStatus
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { ensureBucket, uploadFile } from '$lib/server/storage';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id);
@@ -94,38 +92,6 @@ export const actions: Actions = {
 				note: (data.get('note') as string) || null
 			})
 			.where(eq(visits.id, id));
-
-		return { success: true };
-	},
-
-	importLabs: async ({ params, request }) => {
-		const id = parseInt(params.id);
-		if (isNaN(id)) return fail(400, { error: 'Invalid visit id' });
-
-		const data = await request.formData();
-		const files = data
-			.getAll('files')
-			.filter((f): f is File => f instanceof File && f.size > 0 && /\.(xls|xlsx)$/i.test(f.name));
-
-		if (files.length === 0) return fail(400, { error: 'No valid .xls or .xlsx files provided' });
-
-		await ensureBucket('watershed');
-		const keys = await Promise.all(
-			files.map(async (file) => {
-				const key = `visits/${id}/labs/${Date.now()}-${file.name}`;
-				await uploadFile(
-					'watershed',
-					key,
-					await file.arrayBuffer(),
-					file.type || 'application/octet-stream'
-				);
-				return key;
-			})
-		);
-
-		await db
-			.insert(visitLabsImportQueue)
-			.values(keys.map((key) => ({ visitId: id, uri: `s3://watershed/${key}` })));
 
 		return { success: true };
 	}
