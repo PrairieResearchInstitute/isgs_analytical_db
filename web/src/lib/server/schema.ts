@@ -8,6 +8,7 @@ import {
 	time,
 	timestamp,
 	varchar,
+	boolean,
 	foreignKey
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -180,7 +181,8 @@ export const pressureTemperatureDepth = pgTable(
 		timestamp: timestamp('timestamp', { withTimezone: false }),
 		pressure: real('pressure'),
 		temperature: real('temperature'),
-		depth: real('depth')
+		depth: real('depth'),
+		includeInReport: boolean('include_in_report').notNull().default(true)
 	},
 	(table) => [
 		foreignKey({

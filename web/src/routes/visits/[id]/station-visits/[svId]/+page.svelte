@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { fly } from 'svelte/transition';
+	import PtdReviewPanel from './PtdReviewPanel.svelte';
 	import {
 		Chart,
 		ScatterController,
@@ -23,6 +25,8 @@
 	let tempChartCanvas = $state<HTMLCanvasElement | null>(null);
 	let depthChartCanvas = $state<HTMLCanvasElement | null>(null);
 	let diverTempCanvas = $state<HTMLCanvasElement | null>(null);
+
+	let showPtdReview = $state(false);
 
 	let sampleDialog = $state<HTMLDialogElement | null>(null);
 	let editingSample = $state<(typeof data.samples)[0] | null>(null);
@@ -495,7 +499,16 @@
 <!-- PTD section -->
 {#if data.ptdRecords.length > 0}
 	<div class="mb-8">
-		<h2 class="font-heading font-bold text-xl text-il-blue mb-4">PTD Measurements</h2>
+		<div class="flex items-center justify-between mb-4">
+			<h2 class="font-heading font-bold text-xl text-il-blue">PTD Measurements</h2>
+			<button
+				type="button"
+				onclick={() => (showPtdReview = true)}
+				class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
+			>
+				Review PTD
+			</button>
+		</div>
 
 		<!-- Summary statistics -->
 		<div class="grid grid-cols-3 gap-4 mb-4">
@@ -547,6 +560,12 @@
 				<canvas bind:this={depthChartCanvas}></canvas>
 			</div>
 		</div>
+	</div>
+{/if}
+
+{#if showPtdReview}
+	<div transition:fly={{ y: '100%', duration: 300 }} class="fixed inset-0 z-50">
+		<PtdReviewPanel records={data.ptdRecords} onclose={() => (showPtdReview = false)} />
 	</div>
 {/if}
 

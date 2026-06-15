@@ -9,7 +9,7 @@ import {
 	temperatures,
 	samples
 } from '$lib/server/schema';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, and, inArray } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { ensureBucket, uploadFile } from '$lib/server/storage';
@@ -46,7 +46,8 @@ export const load: PageServerLoad = async ({ params }) => {
 				timestamp: pressureTemperatureDepth.timestamp,
 				pressure: pressureTemperatureDepth.pressure,
 				temperature: pressureTemperatureDepth.temperature,
-				depth: pressureTemperatureDepth.depth
+				depth: pressureTemperatureDepth.depth,
+				includeInReport: pressureTemperatureDepth.includeInReport
 			})
 			.from(pressureTemperatureDepth)
 			.where(eq(pressureTemperatureDepth.stationVisitId, svId))
@@ -121,6 +122,37 @@ export const actions: Actions = {
 			.where(eq(stationVisits.id, svId));
 
 		redirect(303, `/visits/${visitId}/station-visits/${svId}`);
+	},
+
+	updatePtdExclusions: async ({ request, params }) => {
+		const svId = parseInt(params.svId);
+		const data = await request.formData();
+		const excludedIds: number[] = JSON.parse((data.get('excludedIds') as string) || '[]');
+		const includedIds: number[] = JSON.parse((data.get('includedIds') as string) || '[]');
+
+		if (excludedIds.length > 0) {
+			await db
+				.update(pressureTemperatureDepth)
+				.set({ includeInReport: false })
+				.where(
+					and(
+						eq(pressureTemperatureDepth.stationVisitId, svId),
+						inArray(pressureTemperatureDepth.id, excludedIds)
+					)
+				);
+		}
+		if (includedIds.length > 0) {
+			await db
+				.update(pressureTemperatureDepth)
+				.set({ includeInReport: true })
+				.where(
+					and(
+						eq(pressureTemperatureDepth.stationVisitId, svId),
+						inArray(pressureTemperatureDepth.id, includedIds)
+					)
+				);
+		}
+		return {};
 	},
 
 	addPtd: async ({ request, params }) => {
