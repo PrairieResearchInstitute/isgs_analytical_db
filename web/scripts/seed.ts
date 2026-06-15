@@ -285,11 +285,35 @@ async function main() {
 	}
 	console.log(`Seeded ${stationRows.length} stations`);
 
+	// Seed SO_Read → stationVisits
+	type RawSoRead = {
+		VisitID: number;
+		StationID: number;
+		Level?: number;
+		Note?: string;
+		StatusID?: number;
+	};
+	const soReadRows = parseNdjson<RawSoRead>(`${dataDir}/SO_Read.json`);
+	const soReadValues = soReadRows.map((r) => ({
+		visitId: r.VisitID,
+		stationId: r.StationID,
+		level: r.Level ?? null,
+		notes: r.Note ?? null,
+		statusId: r.StatusID ?? null
+	}));
+	for (const chunk of chunkArray(soReadValues, 50)) {
+		await db.insert(schema.stationVisits).values(chunk).onConflictDoNothing();
+	}
+	console.log(`Seeded ${soReadRows.length} station visits`);
+
 	// Sync sequences so subsequent inserts get correct auto-incremented IDs
 	await db.execute(sql`SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects))`);
 	await db.execute(sql`SELECT setval('visits_id_seq', (SELECT MAX(id) FROM visits))`);
 	await db.execute(sql`SELECT setval('stations_id_seq', (SELECT MAX(id) FROM stations))`);
 	await db.execute(sql`SELECT setval('sites_id_seq', COALESCE((SELECT MAX(id) FROM sites), 1))`);
+	await db.execute(
+		sql`SELECT setval('station_visits_id_seq', COALESCE((SELECT MAX(id) FROM station_visits), 1))`
+	);
 	console.log('Sequences synced');
 
 	await client.end();
