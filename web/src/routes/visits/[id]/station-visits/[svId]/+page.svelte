@@ -29,17 +29,8 @@
 	let showPtdReview = $state(false);
 
 	let sampleDialog = $state<HTMLDialogElement | null>(null);
-	let editingSample = $state<(typeof data.samples)[0] | null>(null);
 
-	function onSampleDialogClick(e: MouseEvent) {
-		if (e.target === sampleDialog) sampleDialog?.close();
-	}
 	function openAddSample() {
-		editingSample = null;
-		sampleDialog?.showModal();
-	}
-	function openEditSample(s: (typeof data.samples)[0]) {
-		editingSample = s;
 		sampleDialog?.showModal();
 	}
 
@@ -469,7 +460,6 @@
 								>Sample Name</th
 							>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
-							<th class="px-4 py-3"></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -477,16 +467,14 @@
 							<tr
 								class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
 							>
-								<td class="px-4 py-3 font-semibold text-il-storm-30">{sample.sampleName ?? '—'}</td>
-								<td class="px-4 py-3 text-il-storm">{sample.notes ?? '—'}</td>
-								<td class="px-4 py-3">
-									<button
-										type="button"
-										onclick={() => openEditSample(sample)}
-										class="text-xs font-sans font-semibold text-il-blue hover:underline"
-										>Edit</button
+								<td class="px-4 py-3 font-semibold text-il-storm-30">
+									<a
+										href="/visits/{data.visit.id}/station-visits/{data.stationVisit
+											.id}/samples/{sample.id}"
+										class="hover:underline text-il-blue">{sample.sampleName ?? '—'}</a
 									>
 								</td>
+								<td class="px-4 py-3 text-il-storm">{sample.notes ?? '—'}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -617,13 +605,13 @@
 <!-- Sample dialog -->
 <dialog
 	bind:this={sampleDialog}
-	onclick={onSampleDialogClick}
+	onclick={(e) => {
+		if (e.target === sampleDialog) sampleDialog?.close();
+	}}
 	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
 >
 	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">
-			{editingSample ? 'Edit Sample' : 'Add Sample'}
-		</h2>
+		<h2 class="font-heading font-bold text-xl text-il-blue">Add Sample</h2>
 		<button
 			type="button"
 			onclick={() => sampleDialog?.close()}
@@ -634,16 +622,12 @@
 
 	<form
 		method="POST"
-		action={editingSample ? '?/updateSample' : '?/addSample'}
+		action="?/addSample"
 		use:enhance={() =>
 			({ update }) =>
 				update().then(() => sampleDialog?.close())}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		{#if editingSample}
-			<input type="hidden" name="sampleId" value={editingSample.id} />
-		{/if}
-
 		<div class="flex flex-col gap-1">
 			<label
 				for="sampleName"
@@ -656,7 +640,6 @@
 				name="sampleName"
 				type="text"
 				maxlength="32"
-				value={editingSample?.sampleName ?? ''}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
 			/>
 		</div>
@@ -673,8 +656,7 @@
 				name="notes"
 				rows={3}
 				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-y"
-				>{editingSample?.notes ?? ''}</textarea
-			>
+			></textarea>
 		</div>
 
 		<div class="flex items-center justify-between pt-2">
@@ -691,21 +673,4 @@
 			>
 		</div>
 	</form>
-
-	{#if editingSample}
-		<div class="px-6 pb-5">
-			<form
-				method="POST"
-				action="?/deleteSample"
-				use:enhance={() =>
-					({ update }) =>
-						update().then(() => sampleDialog?.close())}
-			>
-				<input type="hidden" name="sampleId" value={editingSample.id} />
-				<button type="submit" class="text-xs font-sans font-semibold text-red-600 hover:underline"
-					>Delete sample</button
-				>
-			</form>
-		</div>
-	{/if}
 </dialog>

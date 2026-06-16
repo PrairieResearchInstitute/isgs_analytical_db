@@ -207,25 +207,5 @@ export const actions: Actions = {
 			notes: (data.get('notes') as string) || null
 		});
 		return {};
-	},
-
-	updateSample: async ({ request }) => {
-		const data = await request.formData();
-		const sampleId = parseInt(data.get('sampleId') as string);
-		await db
-			.update(samples)
-			.set({
-				sampleName: (data.get('sampleName') as string) || null,
-				notes: (data.get('notes') as string) || null
-			})
-			.where(eq(samples.id, sampleId));
-		return {};
-	},
-
-	deleteSample: async ({ request }) => {
-		const data = await request.formData();
-		const sampleId = parseInt(data.get('sampleId') as string);
-		await db.delete(samples).where(eq(samples.id, sampleId));
-		return {};
 	}
 };

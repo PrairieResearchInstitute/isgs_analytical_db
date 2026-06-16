@@ -235,8 +235,72 @@ export const samples = pgTable('samples', {
 		.notNull()
 		.references(() => stationVisits.id),
 	sampleName: varchar('sample_name', { length: 32 }),
-	notes: text('notes')
+	notes: text('notes'),
+	pumpType: text('pump_type'),
+	flowRate: real('flow_rate'),
+	finalFlowRate: real('final_flow_rate'),
+	tubingType: text('tubing_type'),
+	deviceModel: text('device_model'),
+	deviceSn: text('device_sn')
 });
 
 export type Sample = typeof samples.$inferSelect;
 export type NewSample = typeof samples.$inferInsert;
+
+export const sondeImportQueue = pgTable(
+	'sonde_import_queue',
+	{
+		id: serial('id').primaryKey(),
+		sampleId: integer('sample_id').notNull(),
+		uri: text('uri').notNull(),
+		timestamp: timestamp('timestamp').notNull().defaultNow()
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.sampleId],
+			foreignColumns: [samples.id],
+			name: 'siq_sample_id_fk'
+		})
+	]
+);
+
+export type SondeImportQueueEntry = typeof sondeImportQueue.$inferSelect;
+export type NewSondeImportQueueEntry = typeof sondeImportQueue.$inferInsert;
+
+export const sondeData = pgTable(
+	'sonde_data',
+	{
+		id: serial('id').primaryKey(),
+		sampleId: integer('sample_id').notNull(),
+		timestamp: timestamp('timestamp', { withTimezone: false }),
+		elapsedTime: text('elapsed_time'),
+		flow: real('flow'),
+		actualConductivity: real('actual_conductivity'),
+		specificConductivity: real('specific_conductivity'),
+		salinity: real('salinity'),
+		resistivity: real('resistivity'),
+		density: real('density'),
+		totalDissolvedSolids: real('total_dissolved_solids'),
+		turbidity: real('turbidity'),
+		ph: real('ph'),
+		phMv: real('ph_mv'),
+		orp: real('orp'),
+		rdoConcentration: real('rdo_concentration'),
+		rdoSaturation: real('rdo_saturation'),
+		oxygenPartialPressure: real('oxygen_partial_pressure'),
+		temperature: real('temperature'),
+		externalVoltage: real('external_voltage'),
+		batteryCapacity: real('battery_capacity'),
+		barometricPressure: real('barometric_pressure')
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.sampleId],
+			foreignColumns: [samples.id],
+			name: 'sd_sample_id_fk'
+		})
+	]
+);
+
+export type SondeData = typeof sondeData.$inferSelect;
+export type NewSondeData = typeof sondeData.$inferInsert;
