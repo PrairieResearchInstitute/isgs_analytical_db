@@ -240,23 +240,3 @@ export const samples = pgTable('samples', {
 
 export type Sample = typeof samples.$inferSelect;
 export type NewSample = typeof samples.$inferInsert;
-
-export const visitLabsImportQueue = pgTable(
-	'visit_labs_import_queue',
-	{
-		id: serial('id').primaryKey(),
-		visitId: integer('visit_id').notNull(),
-		uri: text('uri').notNull(),
-		timestamp: timestamp('timestamp').notNull().defaultNow()
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.visitId],
-			foreignColumns: [visits.id],
-			name: 'vliq_visit_id_fk'
-		})
-	]
-);
-
-export type VisitLabsImportQueueEntry = typeof visitLabsImportQueue.$inferSelect;
-export type NewVisitLabsImportQueueEntry = typeof visitLabsImportQueue.$inferInsert;
