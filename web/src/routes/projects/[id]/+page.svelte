@@ -1,34 +1,29 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { closeOnSuccess } from '$lib/forms';
+	import AppDialog from '$lib/components/AppDialog.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import SelectField from '$lib/components/SelectField.svelte';
+	import TextareaField from '$lib/components/TextareaField.svelte';
+	import TableHeader from '$lib/components/TableHeader.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let dialog = $state<HTMLDialogElement | null>(null);
-	let stationDialog = $state<HTMLDialogElement | null>(null);
+	let dialogOpen = $state(false);
+	let stationDialogOpen = $state(false);
+	let visitDialogOpen = $state(false);
 	let editingStation = $state<(typeof data.stations)[0] | null>(null);
-	let visitDialog = $state<HTMLDialogElement | null>(null);
-
-	function onDialogClick(e: MouseEvent) {
-		if (e.target === dialog) dialog?.close();
-	}
-
-	function onStationDialogClick(e: MouseEvent) {
-		if (e.target === stationDialog) stationDialog?.close();
-	}
-
-	function onVisitDialogClick(e: MouseEvent) {
-		if (e.target === visitDialog) visitDialog?.close();
-	}
 
 	function openAddStation() {
 		editingStation = null;
-		stationDialog?.showModal();
+		stationDialogOpen = true;
 	}
 
 	function openEditStation(station: (typeof data.stations)[0]) {
 		editingStation = station;
-		stationDialog?.showModal();
+		stationDialogOpen = true;
 	}
 
 	function formatDate(val: string | null): string {
@@ -49,13 +44,7 @@
 	>
 		← Projects
 	</a>
-	<button
-		type="button"
-		onclick={() => dialog?.showModal()}
-		class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-	>
-		Edit
-	</button>
+	<Button onclick={() => (dialogOpen = true)} class="inline-flex items-center gap-2">Edit</Button>
 </div>
 
 <!-- Project detail card -->
@@ -104,13 +93,7 @@
 <div class="mt-8">
 	<div class="flex items-center justify-between mb-4">
 		<h2 class="font-heading font-bold text-xl text-il-blue">Stations</h2>
-		<button
-			type="button"
-			onclick={openAddStation}
-			class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-		>
-			Add Station
-		</button>
+		<Button onclick={openAddStation} class="inline-flex items-center gap-2">Add Station</Button>
 	</div>
 	{#if data.stations.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
@@ -120,7 +103,7 @@
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
 			<div class="overflow-y-auto max-h-[440px]">
 				<table class="w-full text-sm font-sans">
-					<thead class="bg-il-blue text-white sticky top-0 z-10">
+					<TableHeader sticky>
 						<tr>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Name</th>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Code</th>
@@ -134,7 +117,7 @@
 							>
 							<th class="px-4 py-3"></th>
 						</tr>
-					</thead>
+					</TableHeader>
 					<tbody>
 						{#each data.stations as station (station.id)}
 							<tr
@@ -174,13 +157,9 @@
 <div class="mt-8">
 	<div class="flex items-center justify-between mb-4">
 		<h2 class="font-heading font-bold text-xl text-il-blue">Visits</h2>
-		<button
-			type="button"
-			onclick={() => visitDialog?.showModal()}
-			class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-		>
+		<Button onclick={() => (visitDialogOpen = true)} class="inline-flex items-center gap-2">
 			+ New Visit
-		</button>
+		</Button>
 	</div>
 	{#if data.visits.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
@@ -189,7 +168,7 @@
 	{:else}
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
 			<table class="w-full text-sm font-sans">
-				<thead class="bg-il-blue text-white">
+				<TableHeader>
 					<tr>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
@@ -197,7 +176,7 @@
 						>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Note</th>
 					</tr>
-				</thead>
+				</TableHeader>
 				<tbody>
 					{#each data.visits as visit (visit.id)}
 						<tr
@@ -222,599 +201,262 @@
 	{/if}
 </div>
 
-<!-- Edit dialog -->
-<dialog
-	bind:this={dialog}
-	onclick={onDialogClick}
-	class="w-full max-w-2xl rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
->
-	<!-- Dialog header -->
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">Edit Project</h2>
-		<button
-			type="button"
-			onclick={() => dialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close"
-		>
-			&times;
-		</button>
-	</div>
-
-	<!-- Edit form -->
+<!-- Edit project dialog -->
+<AppDialog bind:open={dialogOpen} title="Edit Project" maxWidth="max-w-2xl">
 	<form
 		method="POST"
 		action="?/update"
-		use:enhance={() =>
-			({ update }) =>
-				update().then(() => dialog?.close())}
+		use:enhance={closeOnSuccess(() => (dialogOpen = false))}
 		class="px-6 py-5 grid grid-cols-2 gap-x-5 gap-y-4"
 	>
-		<!-- ISGS Num -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="isgsNum"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				ISGS #
-			</label>
-			<input
-				id="isgsNum"
-				name="isgsNum"
-				type="text"
-				value={data.project.isgsNum ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField id="isgsNum" name="isgsNum" label="ISGS #" value={data.project.isgsNum ?? ''} />
+		<TextField
+			id="idotName"
+			name="idotName"
+			label="IDOT Name"
+			required
+			value={data.project.idotName ?? ''}
+		/>
+		<TextField
+			id="isgsName"
+			name="isgsName"
+			label="ISGS Name"
+			value={data.project.isgsName ?? ''}
+		/>
+		<TextField id="faNum" name="faNum" label="FA #" value={data.project.faNum ?? ''} />
+		<TextField
+			id="beginDt"
+			name="beginDt"
+			label="Begin Date"
+			type="date"
+			value={data.project.beginDt ?? ''}
+		/>
+		<TextField
+			id="endDt"
+			name="endDt"
+			label="End Date"
+			type="date"
+			value={data.project.endDt ?? ''}
+		/>
 
-		<!-- IDOT Name -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="idotName"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				IDOT Name <span class="text-il-orange">*</span>
-			</label>
-			<input
-				id="idotName"
-				name="idotName"
-				type="text"
-				required
-				value={data.project.idotName ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField id="county" name="county" label="County" value={data.project.county ?? ''}>
+			<option value="">— Select county —</option>
+			{#each data.counties as c (c.cntycode)}
+				<option value={c.cntycode}>{c.cntyname}</option>
+			{/each}
+		</SelectField>
 
-		<!-- ISGS Name -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="isgsName"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				ISGS Name
-			</label>
-			<input
-				id="isgsName"
-				name="isgsName"
-				type="text"
-				value={data.project.isgsName ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField id="typeId" name="typeId" label="Type" value={data.project.typeId ?? ''}>
+			<option value="">— Select type —</option>
+			{#each data.siteTypes as st (st.id)}
+				<option value={st.id}>{st.siteType}</option>
+			{/each}
+		</SelectField>
 
-		<!-- FA Number -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="faNum"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				FA #
-			</label>
-			<input
-				id="faNum"
-				name="faNum"
-				type="text"
-				value={data.project.faNum ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- Begin Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="beginDt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Begin Date
-			</label>
-			<input
-				id="beginDt"
-				name="beginDt"
-				type="date"
-				value={data.project.beginDt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- End Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="endDt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				End Date
-			</label>
-			<input
-				id="endDt"
-				name="endDt"
-				type="date"
-				value={data.project.endDt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- County -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="county"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				County
-			</label>
-			<select
-				id="county"
-				name="county"
-				value={data.project.county ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select county —</option>
-				{#each data.counties as c (c.cntycode)}
-					<option value={c.cntycode}>{c.cntyname}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Site Type -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="typeId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Type
-			</label>
-			<select
-				id="typeId"
-				name="typeId"
-				value={data.project.typeId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select type —</option>
-				{#each data.siteTypes as st (st.id)}
-					<option value={st.id}>{st.siteType}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Seq Code -->
-		<div class="flex flex-col gap-1 col-span-2">
-			<label
-				for="seqCode"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Seq Code
-			</label>
-			<input
-				id="seqCode"
-				name="seqCode"
-				type="text"
-				value={data.project.seqCode ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField
+			id="seqCode"
+			name="seqCode"
+			label="Seq Code"
+			class="col-span-2"
+			value={data.project.seqCode ?? ''}
+		/>
 
 		<!-- Form actions -->
 		<div class="col-span-2 flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
-			<button
-				type="button"
-				onclick={() => dialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
-			>
-				Cancel
-			</button>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
-				Save Changes
-			</button>
+			<Button variant="secondary" onclick={() => (dialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Save Changes</Button>
 		</div>
 	</form>
 
 	<!-- Delete form -->
 	<div class="px-6 pb-5">
 		<form method="POST" action="?/delete" use:enhance>
-			<button
+			<Button
 				type="submit"
-				class="text-sm font-sans font-semibold text-red-600 hover:text-red-800 underline transition-colors"
+				variant="danger"
 				onclick={(e) => {
 					if (!confirm('Delete this project? This cannot be undone.')) e.preventDefault();
 				}}
 			>
 				Delete Project
-			</button>
+			</Button>
 		</form>
 	</div>
-</dialog>
+</AppDialog>
 
 <!-- Station add/edit dialog -->
-<dialog
-	bind:this={stationDialog}
-	onclick={onStationDialogClick}
-	class="w-full max-w-3xl rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
+<AppDialog
+	bind:open={stationDialogOpen}
+	title={editingStation ? 'Edit Station' : 'Add Station'}
+	maxWidth="max-w-3xl"
 >
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">
-			{editingStation ? 'Edit Station' : 'Add Station'}
-		</h2>
-		<button
-			type="button"
-			onclick={() => stationDialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close"
-		>
-			&times;
-		</button>
-	</div>
-
 	<form
 		method="POST"
 		action="?/saveStation"
-		use:enhance={() =>
-			({ update }) =>
-				update().then(() => stationDialog?.close())}
+		use:enhance={closeOnSuccess(() => (stationDialogOpen = false))}
 		class="px-6 py-5 grid grid-cols-2 gap-x-5 gap-y-4 overflow-y-auto max-h-[70vh]"
 	>
 		<input type="hidden" name="stationId" value={editingStation?.id ?? ''} />
 
-		<!-- Station Name -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="staName"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Station Name <span class="text-il-orange">*</span>
-			</label>
-			<input
-				id="staName"
-				name="staName"
-				type="text"
-				required
-				value={editingStation?.staName ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField
+			id="staName"
+			name="staName"
+			label="Station Name"
+			required
+			value={editingStation?.staName ?? ''}
+		/>
+		<TextField id="stationCode" name="code" label="Code" value={editingStation?.code ?? ''} />
 
-		<!-- Code -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationCode"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Code
-			</label>
-			<input
-				id="stationCode"
-				name="code"
-				type="text"
-				value={editingStation?.code ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField
+			id="stationTypeId"
+			name="typeId"
+			label="Station Type"
+			required
+			value={editingStation?.typeId ?? ''}
+		>
+			<option value="">— Select type —</option>
+			{#each data.stationTypes as st (st.id)}
+				<option value={st.id}>{st.type}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Station Type -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationTypeId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Station Type <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="stationTypeId"
-				name="typeId"
-				required
-				value={editingStation?.typeId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select type —</option>
-				{#each data.stationTypes as st (st.id)}
-					<option value={st.id}>{st.type}</option>
-				{/each}
-			</select>
-		</div>
+		<SelectField
+			id="stationLocationTypeId"
+			name="locationTypeId"
+			label="Location Type"
+			value={editingStation?.locationTypeId ?? ''}
+		>
+			<option value="">— Select location type —</option>
+			{#each data.locationTypes as lt (lt.id)}
+				<option value={lt.id}>{lt.locationType}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Location Type -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationLocationTypeId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Location Type
-			</label>
-			<select
-				id="stationLocationTypeId"
-				name="locationTypeId"
-				value={editingStation?.locationTypeId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select location type —</option>
-				{#each data.locationTypes as lt (lt.id)}
-					<option value={lt.id}>{lt.locationType}</option>
-				{/each}
-			</select>
-		</div>
+		<TextField
+			id="stationBeginDt"
+			name="beginDt"
+			label="Begin Date"
+			type="date"
+			value={editingStation?.beginDt ?? ''}
+		/>
+		<TextField
+			id="stationEndDt"
+			name="endDt"
+			label="End Date"
+			type="date"
+			value={editingStation?.endDt ?? ''}
+		/>
+		<TextField
+			id="stationLat"
+			name="latitude"
+			label="Latitude"
+			type="number"
+			step="any"
+			value={editingStation?.latitude ?? ''}
+		/>
+		<TextField
+			id="stationLng"
+			name="longitude"
+			label="Longitude"
+			type="number"
+			step="any"
+			value={editingStation?.longitude ?? ''}
+		/>
 
-		<!-- Begin Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationBeginDt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Begin Date
-			</label>
-			<input
-				id="stationBeginDt"
-				name="beginDt"
-				type="date"
-				value={editingStation?.beginDt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField
+			id="stationInitials"
+			name="initials"
+			label="Field Scientist"
+			required
+			value={editingStation?.initials ?? ''}
+		>
+			<option value="">— Select scientist —</option>
+			{#each data.scientists as s (s.initials)}
+				<option value={s.initials}>
+					{[s.firstName, s.lastName].filter(Boolean).join(' ')} ({s.initials})
+				</option>
+			{/each}
+		</SelectField>
 
-		<!-- End Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationEndDt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				End Date
-			</label>
-			<input
-				id="stationEndDt"
-				name="endDt"
-				type="date"
-				value={editingStation?.endDt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField id="isgsId" name="isgsId" label="ISGS ID" value={editingStation?.isgsId ?? ''} />
 
-		<!-- Latitude -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationLat"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Latitude
-			</label>
-			<input
-				id="stationLat"
-				name="latitude"
-				type="number"
-				step="any"
-				value={editingStation?.latitude ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField
+			id="stationInstTypeId"
+			name="instTypeId"
+			label="Instrument Type"
+			value={editingStation?.instTypeId ?? ''}
+		>
+			<option value="">— Select instrument type —</option>
+			{#each data.instTypes as it (it.id)}
+				<option value={it.id}>{it.instType}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Longitude -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationLng"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Longitude
-			</label>
-			<input
-				id="stationLng"
-				name="longitude"
-				type="number"
-				step="any"
-				value={editingStation?.longitude ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField
+			id="stationUnitsId"
+			name="instUnitsId"
+			label="Units"
+			value={editingStation?.instUnitsId ?? ''}
+		>
+			<option value="">— Select units —</option>
+			{#each data.stationUnits as u (u.id)}
+				<option value={u.id}>{u.unitsReading}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Field Scientist -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationInitials"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Field Scientist <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="stationInitials"
-				name="initials"
-				required
-				value={editingStation?.initials ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select scientist —</option>
-				{#each data.scientists as s (s.initials)}
-					<option value={s.initials}>
-						{[s.firstName, s.lastName].filter(Boolean).join(' ')} ({s.initials})
-					</option>
-				{/each}
-			</select>
-		</div>
+		<SelectField
+			id="stationReadTypeId"
+			name="stationTypeId"
+			label="Read Type"
+			value={editingStation?.stationTypeId ?? ''}
+		>
+			<option value="">— Select read type —</option>
+			{#each data.stationReadTypes as rt (rt.id)}
+				<option value={rt.id}>{rt.loggerType} — {rt.readType}</option>
+			{/each}
+		</SelectField>
 
-		<!-- ISGS ID -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="isgsId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				ISGS ID
-			</label>
-			<input
-				id="isgsId"
-				name="isgsId"
-				type="text"
-				value={editingStation?.isgsId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<SelectField
+			id="stationBorMethodId"
+			name="borMethodId"
+			label="Boring Method"
+			value={editingStation?.borMethodId ?? ''}
+		>
+			<option value="">— Select boring method —</option>
+			{#each data.boringMethods as bm (bm.id)}
+				<option value={bm.id}>{bm.boringMethod}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Instrument Type -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationInstTypeId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Instrument Type
-			</label>
-			<select
-				id="stationInstTypeId"
-				name="instTypeId"
-				value={editingStation?.instTypeId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select instrument type —</option>
-				{#each data.instTypes as it (it.id)}
-					<option value={it.id}>{it.instType}</option>
-				{/each}
-			</select>
-		</div>
+		<TextField
+			id="stationBorDt"
+			name="borDt"
+			label="Boring Date"
+			type="date"
+			value={editingStation?.borDt ?? ''}
+		/>
+		<TextField
+			id="stationLabelAlt"
+			name="labelAlt"
+			label="Label Alt"
+			value={editingStation?.labelAlt ?? ''}
+		/>
 
-		<!-- Units -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationUnitsId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Units
-			</label>
-			<select
-				id="stationUnitsId"
-				name="instUnitsId"
-				value={editingStation?.instUnitsId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select units —</option>
-				{#each data.stationUnits as u (u.id)}
-					<option value={u.id}>{u.unitsReading}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Read Type -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationReadTypeId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Read Type
-			</label>
-			<select
-				id="stationReadTypeId"
-				name="stationTypeId"
-				value={editingStation?.stationTypeId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select read type —</option>
-				{#each data.stationReadTypes as rt (rt.id)}
-					<option value={rt.id}>{rt.loggerType} — {rt.readType}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Boring Method -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationBorMethodId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Boring Method
-			</label>
-			<select
-				id="stationBorMethodId"
-				name="borMethodId"
-				value={editingStation?.borMethodId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select boring method —</option>
-				{#each data.boringMethods as bm (bm.id)}
-					<option value={bm.id}>{bm.boringMethod}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Boring Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationBorDt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Boring Date
-			</label>
-			<input
-				id="stationBorDt"
-				name="borDt"
-				type="date"
-				value={editingStation?.borDt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- Label Alt -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="stationLabelAlt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Label Alt
-			</label>
-			<input
-				id="stationLabelAlt"
-				name="labelAlt"
-				type="text"
-				value={editingStation?.labelAlt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- Comment -->
-		<div class="flex flex-col gap-1 col-span-2">
-			<label
-				for="stationComment"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Comment
-			</label>
-			<textarea
-				id="stationComment"
-				name="comment"
-				rows="3"
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-none"
-				>{editingStation?.comment ?? ''}</textarea
-			>
-		</div>
+		<TextareaField
+			id="stationComment"
+			name="comment"
+			label="Comment"
+			class="col-span-2"
+			value={editingStation?.comment ?? ''}
+			inputClass="resize-none"
+		/>
 
 		<!-- Form actions -->
 		<div class="col-span-2 flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
-			<button
-				type="button"
-				onclick={() => stationDialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
-			>
-				Cancel
-			</button>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
+			<Button variant="secondary" onclick={() => (stationDialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">
 				{editingStation ? 'Save Changes' : 'Add Station'}
-			</button>
+			</Button>
 		</div>
 	</form>
 
@@ -822,115 +464,44 @@
 		<div class="px-6 pb-5">
 			<form method="POST" action="?/deleteStation" use:enhance>
 				<input type="hidden" name="stationId" value={editingStation.id} />
-				<button
+				<Button
 					type="submit"
-					class="text-sm font-sans font-semibold text-red-600 hover:text-red-800 underline transition-colors"
+					variant="danger"
 					onclick={(e) => {
 						if (!confirm('Delete this station? This cannot be undone.')) e.preventDefault();
 					}}
 				>
 					Delete Station
-				</button>
+				</Button>
 			</form>
 		</div>
 	{/if}
-</dialog>
+</AppDialog>
 
 <!-- New visit dialog -->
-<dialog
-	bind:this={visitDialog}
-	onclick={onVisitDialogClick}
-	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
->
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">New Visit</h2>
-		<button
-			type="button"
-			onclick={() => visitDialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close"
-		>
-			&times;
-		</button>
-	</div>
-
+<AppDialog bind:open={visitDialogOpen} title="New Visit">
 	<form
 		method="POST"
 		action="?/addVisit"
-		use:enhance={() =>
-			({ update }) =>
-				update().then(() => visitDialog?.close())}
+		use:enhance={closeOnSuccess(() => (visitDialogOpen = false))}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<!-- Field Scientist -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="visitBy"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Field Scientist <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="visitBy"
-				name="by"
-				required
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select scientist —</option>
-				{#each data.scientists as s (s.initials)}
-					<option value={s.initials}>
-						{[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials} ({s.initials})
-					</option>
-				{/each}
-			</select>
-		</div>
+		<SelectField id="visitBy" name="by" label="Field Scientist" required>
+			<option value="">— Select scientist —</option>
+			{#each data.scientists as s (s.initials)}
+				<option value={s.initials}>
+					{[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials} ({s.initials})
+				</option>
+			{/each}
+		</SelectField>
 
-		<!-- Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="visitDt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Date
-			</label>
-			<input
-				id="visitDt"
-				name="dt"
-				type="date"
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField id="visitDt" name="dt" label="Date" type="date" />
 
-		<!-- Notes -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="visitNote"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Notes
-			</label>
-			<textarea
-				id="visitNote"
-				name="note"
-				rows={3}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-none"
-			></textarea>
-		</div>
+		<TextareaField id="visitNote" name="note" label="Notes" inputClass="resize-none" />
 
 		<div class="flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
-			<button
-				type="button"
-				onclick={() => visitDialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
-			>
-				Cancel
-			</button>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
-				Create Visit
-			</button>
+			<Button variant="secondary" onclick={() => (visitDialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Create Visit</Button>
 		</div>
 	</form>
-</dialog>
+</AppDialog>

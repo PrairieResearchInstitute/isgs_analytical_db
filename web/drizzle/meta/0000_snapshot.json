@@ -1,0 +1,1278 @@
+{
+	"id": "5b15a27b-cd95-4aa3-89a0-5584ebdddafc",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.lut_boring_method": {
+			"name": "lut_boring_method",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"boring_method": {
+					"name": "boring_method",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_county_names": {
+			"name": "lut_county_names",
+			"schema": "",
+			"columns": {
+				"cntycode": {
+					"name": "cntycode",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"cntyname": {
+					"name": "cntyname",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_location_type": {
+			"name": "lut_location_type",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"location_type": {
+					"name": "location_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_site_type": {
+			"name": "lut_site_type",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"site_type": {
+					"name": "site_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_station_inst_type": {
+			"name": "lut_station_inst_type",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"inst_type": {
+					"name": "inst_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"wle_equation": {
+					"name": "wle_equation",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_station_read_type": {
+			"name": "lut_station_read_type",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"logger_type": {
+					"name": "logger_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"read_type": {
+					"name": "read_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"idrt": {
+					"name": "idrt",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"logger_type_short": {
+					"name": "logger_type_short",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"is_wq": {
+					"name": "is_wq",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sort_order": {
+					"name": "sort_order",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_station_type": {
+			"name": "lut_station_type",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"type": {
+					"name": "type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"short_type": {
+					"name": "short_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_station_units": {
+			"name": "lut_station_units",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"units_reading": {
+					"name": "units_reading",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"conv_factor": {
+					"name": "conv_factor",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lut_status": {
+			"name": "lut_status",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.lutc_initials": {
+			"name": "lutc_initials",
+			"schema": "",
+			"columns": {
+				"initials": {
+					"name": "initials",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"first_name": {
+					"name": "first_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"last_name": {
+					"name": "last_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.pressure_temperature_depth": {
+			"name": "pressure_temperature_depth",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"station_visit_id": {
+					"name": "station_visit_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"timestamp": {
+					"name": "timestamp",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"pressure": {
+					"name": "pressure",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"temperature": {
+					"name": "temperature",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"depth": {
+					"name": "depth",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"include_in_report": {
+					"name": "include_in_report",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"ptd_station_visit_id_fk": {
+					"name": "ptd_station_visit_id_fk",
+					"tableFrom": "pressure_temperature_depth",
+					"tableTo": "station_visits",
+					"columnsFrom": ["station_visit_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.projects": {
+			"name": "projects",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"isgs_num": {
+					"name": "isgs_num",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"idot_name": {
+					"name": "idot_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"isgs_name": {
+					"name": "isgs_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"begin_dt": {
+					"name": "begin_dt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"end_dt": {
+					"name": "end_dt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"fa_num": {
+					"name": "fa_num",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"county": {
+					"name": "county",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type_id": {
+					"name": "type_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"seq_code": {
+					"name": "seq_code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"projects_county_lut_county_names_cntycode_fk": {
+					"name": "projects_county_lut_county_names_cntycode_fk",
+					"tableFrom": "projects",
+					"tableTo": "lut_county_names",
+					"columnsFrom": ["county"],
+					"columnsTo": ["cntycode"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"projects_type_id_lut_site_type_id_fk": {
+					"name": "projects_type_id_lut_site_type_id_fk",
+					"tableFrom": "projects",
+					"tableTo": "lut_site_type",
+					"columnsFrom": ["type_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.samples": {
+			"name": "samples",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"station_visit_id": {
+					"name": "station_visit_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sample_name": {
+					"name": "sample_name",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notes": {
+					"name": "notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"pump_type": {
+					"name": "pump_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"flow_rate": {
+					"name": "flow_rate",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"final_flow_rate": {
+					"name": "final_flow_rate",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"tubing_type": {
+					"name": "tubing_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"device_model": {
+					"name": "device_model",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"device_sn": {
+					"name": "device_sn",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"samples_station_visit_id_station_visits_id_fk": {
+					"name": "samples_station_visit_id_station_visits_id_fk",
+					"tableFrom": "samples",
+					"tableTo": "station_visits",
+					"columnsFrom": ["station_visit_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.sites": {
+			"name": "sites",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"location": {
+					"name": "location",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"latitude": {
+					"name": "latitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"longitude": {
+					"name": "longitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "CURRENT_TIMESTAMP"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.sonde_data": {
+			"name": "sonde_data",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"sample_id": {
+					"name": "sample_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"timestamp": {
+					"name": "timestamp",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"elapsed_time": {
+					"name": "elapsed_time",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"flow": {
+					"name": "flow",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"actual_conductivity": {
+					"name": "actual_conductivity",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"specific_conductivity": {
+					"name": "specific_conductivity",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"salinity": {
+					"name": "salinity",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"resistivity": {
+					"name": "resistivity",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"density": {
+					"name": "density",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"total_dissolved_solids": {
+					"name": "total_dissolved_solids",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"turbidity": {
+					"name": "turbidity",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"ph": {
+					"name": "ph",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"ph_mv": {
+					"name": "ph_mv",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"orp": {
+					"name": "orp",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"rdo_concentration": {
+					"name": "rdo_concentration",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"rdo_saturation": {
+					"name": "rdo_saturation",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"oxygen_partial_pressure": {
+					"name": "oxygen_partial_pressure",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"temperature": {
+					"name": "temperature",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"external_voltage": {
+					"name": "external_voltage",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"battery_capacity": {
+					"name": "battery_capacity",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"barometric_pressure": {
+					"name": "barometric_pressure",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"sd_sample_id_fk": {
+					"name": "sd_sample_id_fk",
+					"tableFrom": "sonde_data",
+					"tableTo": "samples",
+					"columnsFrom": ["sample_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.sonde_import_queue": {
+			"name": "sonde_import_queue",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"sample_id": {
+					"name": "sample_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"uri": {
+					"name": "uri",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"timestamp": {
+					"name": "timestamp",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"siq_sample_id_fk": {
+					"name": "siq_sample_id_fk",
+					"tableFrom": "sonde_import_queue",
+					"tableTo": "samples",
+					"columnsFrom": ["sample_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.station_visit_import_queue": {
+			"name": "station_visit_import_queue",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"station_visit_id": {
+					"name": "station_visit_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"uri": {
+					"name": "uri",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"timestamp": {
+					"name": "timestamp",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"sviq_station_visit_id_fk": {
+					"name": "sviq_station_visit_id_fk",
+					"tableFrom": "station_visit_import_queue",
+					"tableTo": "station_visits",
+					"columnsFrom": ["station_visit_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.station_visits": {
+			"name": "station_visits",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"visit_id": {
+					"name": "visit_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"station_id": {
+					"name": "station_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status_id": {
+					"name": "status_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"level": {
+					"name": "level",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"time": {
+					"name": "time",
+					"type": "time",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notes": {
+					"name": "notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"station_visits_visit_id_visits_id_fk": {
+					"name": "station_visits_visit_id_visits_id_fk",
+					"tableFrom": "station_visits",
+					"tableTo": "visits",
+					"columnsFrom": ["visit_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"station_visits_station_id_stations_id_fk": {
+					"name": "station_visits_station_id_stations_id_fk",
+					"tableFrom": "station_visits",
+					"tableTo": "stations",
+					"columnsFrom": ["station_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"station_visits_status_id_lut_status_id_fk": {
+					"name": "station_visits_status_id_lut_status_id_fk",
+					"tableFrom": "station_visits",
+					"tableTo": "lut_status",
+					"columnsFrom": ["status_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.stations": {
+			"name": "stations",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"type_id": {
+					"name": "type_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"code": {
+					"name": "code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"begin_dt": {
+					"name": "begin_dt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"end_dt": {
+					"name": "end_dt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"sta_name": {
+					"name": "sta_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"label_alt": {
+					"name": "label_alt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"longitude": {
+					"name": "longitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"latitude": {
+					"name": "latitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"location_type_id": {
+					"name": "location_type_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"initials": {
+					"name": "initials",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"inst_type_id": {
+					"name": "inst_type_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"inst_units_id": {
+					"name": "inst_units_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"station_type_id": {
+					"name": "station_type_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"isgs_id": {
+					"name": "isgs_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"bor_dt": {
+					"name": "bor_dt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"bor_method_id": {
+					"name": "bor_method_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"comment": {
+					"name": "comment",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"stations_project_id_projects_id_fk": {
+					"name": "stations_project_id_projects_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "projects",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_type_id_lut_station_type_id_fk": {
+					"name": "stations_type_id_lut_station_type_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "lut_station_type",
+					"columnsFrom": ["type_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_location_type_id_lut_location_type_id_fk": {
+					"name": "stations_location_type_id_lut_location_type_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "lut_location_type",
+					"columnsFrom": ["location_type_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_initials_lutc_initials_initials_fk": {
+					"name": "stations_initials_lutc_initials_initials_fk",
+					"tableFrom": "stations",
+					"tableTo": "lutc_initials",
+					"columnsFrom": ["initials"],
+					"columnsTo": ["initials"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_inst_type_id_lut_station_inst_type_id_fk": {
+					"name": "stations_inst_type_id_lut_station_inst_type_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "lut_station_inst_type",
+					"columnsFrom": ["inst_type_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_inst_units_id_lut_station_units_id_fk": {
+					"name": "stations_inst_units_id_lut_station_units_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "lut_station_units",
+					"columnsFrom": ["inst_units_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_station_type_id_lut_station_read_type_id_fk": {
+					"name": "stations_station_type_id_lut_station_read_type_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "lut_station_read_type",
+					"columnsFrom": ["station_type_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"stations_bor_method_id_lut_boring_method_id_fk": {
+					"name": "stations_bor_method_id_lut_boring_method_id_fk",
+					"tableFrom": "stations",
+					"tableTo": "lut_boring_method",
+					"columnsFrom": ["bor_method_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.temperatures": {
+			"name": "temperatures",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"station_visit_id": {
+					"name": "station_visit_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"datetime": {
+					"name": "datetime",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"temperature_celsius": {
+					"name": "temperature_celsius",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"temperatures_station_visit_id_station_visits_id_fk": {
+					"name": "temperatures_station_visit_id_station_visits_id_fk",
+					"tableFrom": "temperatures",
+					"tableTo": "station_visits",
+					"columnsFrom": ["station_visit_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.visits": {
+			"name": "visits",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"dt": {
+					"name": "dt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"by": {
+					"name": "by",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"note": {
+					"name": "note",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"reviewed_by": {
+					"name": "reviewed_by",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"reviewed_date": {
+					"name": "reviewed_date",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"visits_project_id_projects_id_fk": {
+					"name": "visits_project_id_projects_id_fk",
+					"tableFrom": "visits",
+					"tableTo": "projects",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"visits_by_lutc_initials_initials_fk": {
+					"name": "visits_by_lutc_initials_initials_fk",
+					"tableFrom": "visits",
+					"tableTo": "lutc_initials",
+					"columnsFrom": ["by"],
+					"columnsTo": ["initials"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"visits_reviewed_by_lutc_initials_initials_fk": {
+					"name": "visits_reviewed_by_lutc_initials_initials_fk",
+					"tableFrom": "visits",
+					"tableTo": "lutc_initials",
+					"columnsFrom": ["reviewed_by"],
+					"columnsTo": ["initials"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}
