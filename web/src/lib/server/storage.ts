@@ -1,12 +1,16 @@
 import { S3Client, CreateBucketCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { env } from '$env/dynamic/private';
 
+if (!env.S3_ENDPOINT) throw new Error('S3_ENDPOINT is not set');
+if (!env.S3_ACCESS_KEY) throw new Error('S3_ACCESS_KEY is not set');
+if (!env.S3_SECRET_KEY) throw new Error('S3_SECRET_KEY is not set');
+
 const s3 = new S3Client({
-	endpoint: env.RUSTFS_ENDPOINT ?? 'http://localhost:9000',
+	endpoint: env.S3_ENDPOINT,
 	region: 'us-east-1',
 	credentials: {
-		accessKeyId: env.RUSTFS_ACCESS_KEY ?? 'rustfsadmin',
-		secretAccessKey: env.RUSTFS_SECRET_KEY ?? 'rustfsadmin'
+		accessKeyId: env.S3_ACCESS_KEY,
+		secretAccessKey: env.S3_SECRET_KEY
 	},
 	forcePathStyle: true
 });

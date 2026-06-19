@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 import dagster as dg
 
-from isgs_dagster.resources import PostgresResource, RustFSResource
+from isgs_dagster.resources import PostgresResource, ObjectStoreResource
 
 
 class SondeDataConfig(dg.Config):
@@ -132,7 +132,7 @@ def sonde_data(
     context: dg.AssetExecutionContext,
     config: SondeDataConfig,
     postgres: PostgresResource,
-    rustfs: RustFSResource,
+    rustfs: ObjectStoreResource,
 ) -> dg.MaterializeResult:
     parsed = urlparse(config.uri)
     bucket = parsed.netloc

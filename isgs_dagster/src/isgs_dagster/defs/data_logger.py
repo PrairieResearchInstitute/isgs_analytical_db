@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import dagster as dg
 
-from isgs_dagster.resources import PostgresResource, RustFSResource
+from isgs_dagster.resources import PostgresResource, ObjectStoreResource
 
 
 class DataLoggerConfig(dg.Config):
@@ -58,7 +58,7 @@ def data_logger(
     context: dg.AssetExecutionContext,
     config: DataLoggerConfig,
     postgres: PostgresResource,
-    rustfs: RustFSResource,
+    rustfs: ObjectStoreResource,
 ) -> dg.MaterializeResult:
     parsed = urlparse(config.uri)
     bucket = parsed.netloc

@@ -10,10 +10,10 @@ class PostgresResource(dg.ConfigurableResource):
         return psycopg2.connect(self.database_url)
 
 
-class RustFSResource(dg.ConfigurableResource):
-    endpoint: str = dg.EnvVar("RUSTFS_ENDPOINT")
-    access_key: str = dg.EnvVar("RUSTFS_ACCESS_KEY")
-    secret_key: str = dg.EnvVar("RUSTFS_SECRET_KEY")
+class ObjectStoreResource(dg.ConfigurableResource):
+    endpoint: str = dg.EnvVar("S3_ENDPOINT")
+    access_key: str = dg.EnvVar("S3_ACCESS_KEY")
+    secret_key: str = dg.EnvVar("S3_SECRET_KEY")
 
     def get_s3_client(self):
         return boto3.client(
