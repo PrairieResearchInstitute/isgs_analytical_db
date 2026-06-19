@@ -1,8 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { closeOnSuccess } from '$lib/forms';
 	import { fly } from 'svelte/transition';
 	import PtdReviewPanel from './PtdReviewPanel.svelte';
+	import AppDialog from '$lib/components/AppDialog.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import SelectField from '$lib/components/SelectField.svelte';
+	import TextareaField from '$lib/components/TextareaField.svelte';
+	import TableHeader from '$lib/components/TableHeader.svelte';
 	import {
 		Chart,
 		ScatterController,
@@ -28,11 +35,7 @@
 
 	let showPtdReview = $state(false);
 
-	let sampleDialog = $state<HTMLDialogElement | null>(null);
-
-	function openAddSample() {
-		sampleDialog?.showModal();
-	}
+	let sampleDialogOpen = $state(false);
 
 	function calcStats(vals: number[]) {
 		if (!vals.length) return null;
@@ -267,78 +270,44 @@
 		}}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<!-- Time -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="sv-time"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Time
-			</label>
-			<input
-				id="sv-time"
-				name="time"
-				type="time"
-				value={data.stationVisit.time ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-			/>
-		</div>
+		<TextField
+			id="sv-time"
+			name="time"
+			label="Time"
+			type="time"
+			value={data.stationVisit.time ?? ''}
+			inputClass="max-w-xs"
+		/>
+		<TextField
+			id="sv-level"
+			name="level"
+			label="Level"
+			type="number"
+			step="any"
+			value={data.stationVisit.level ?? ''}
+			inputClass="max-w-xs"
+		/>
 
-		<!-- Level -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="sv-level"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Level
-			</label>
-			<input
-				id="sv-level"
-				name="level"
-				type="number"
-				step="any"
-				value={data.stationVisit.level ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-			/>
-		</div>
+		<SelectField
+			id="sv-status"
+			name="statusId"
+			label="Status"
+			value={data.stationVisit.statusId ?? ''}
+			inputClass="max-w-xs"
+		>
+			<option value="">— Select status —</option>
+			{#each data.statuses as s (s.id)}
+				<option value={s.id}>{s.status}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Status -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="sv-status"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Status
-			</label>
-			<select
-				id="sv-status"
-				name="statusId"
-				value={data.stationVisit.statusId ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-			>
-				<option value="">— Select status —</option>
-				{#each data.statuses as s (s.id)}
-					<option value={s.id}>{s.status}</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Notes -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="sv-notes"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Notes
-			</label>
-			<textarea
-				id="sv-notes"
-				name="notes"
-				rows={3}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-y max-w-lg"
-				>{data.stationVisit.notes ?? ''}</textarea
-			>
-		</div>
+		<TextareaField
+			id="sv-notes"
+			name="notes"
+			label="Notes"
+			value={data.stationVisit.notes ?? ''}
+			inputClass="resize-y max-w-lg"
+		/>
 
 		<!-- Files -->
 		<div class="flex flex-col gap-2 max-w-lg">
@@ -424,12 +393,7 @@
 		</div>
 
 		<div class="flex pt-2">
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
-				Save
-			</button>
+			<Button type="submit" class="px-5">Save</Button>
 		</div>
 	</form>
 </div>
@@ -438,13 +402,9 @@
 <div class="mb-8">
 	<div class="flex items-center justify-between mb-4">
 		<h2 class="font-heading font-bold text-xl text-il-blue">Samples</h2>
-		<button
-			type="button"
-			onclick={openAddSample}
-			class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-		>
+		<Button onclick={() => (sampleDialogOpen = true)} class="inline-flex items-center gap-2">
 			+ Add Sample
-		</button>
+		</Button>
 	</div>
 	{#if data.samples.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
@@ -454,14 +414,14 @@
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
 			<div class="overflow-y-auto max-h-[440px]">
 				<table class="w-full text-sm font-sans">
-					<thead class="bg-il-blue text-white sticky top-0 z-10">
+					<TableHeader sticky>
 						<tr>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
 								>Sample Name</th
 							>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
 						</tr>
-					</thead>
+					</TableHeader>
 					<tbody>
 						{#each data.samples as sample (sample.id)}
 							<tr
@@ -489,13 +449,9 @@
 	<div class="mb-8">
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="font-heading font-bold text-xl text-il-blue">PTD Measurements</h2>
-			<button
-				type="button"
-				onclick={() => (showPtdReview = true)}
-				class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-			>
+			<Button onclick={() => (showPtdReview = true)} class="inline-flex items-center gap-2">
 				Review PTD
-			</button>
+			</Button>
 		</div>
 
 		<!-- Summary statistics -->
@@ -603,74 +559,19 @@
 {/if}
 
 <!-- Sample dialog -->
-<dialog
-	bind:this={sampleDialog}
-	onclick={(e) => {
-		if (e.target === sampleDialog) sampleDialog?.close();
-	}}
-	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
->
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">Add Sample</h2>
-		<button
-			type="button"
-			onclick={() => sampleDialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close">&times;</button
-		>
-	</div>
-
+<AppDialog bind:open={sampleDialogOpen} title="Add Sample">
 	<form
 		method="POST"
 		action="?/addSample"
-		use:enhance={() =>
-			({ update }) =>
-				update().then(() => sampleDialog?.close())}
+		use:enhance={closeOnSuccess(() => (sampleDialogOpen = false))}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<div class="flex flex-col gap-1">
-			<label
-				for="sampleName"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Sample Name
-			</label>
-			<input
-				id="sampleName"
-				name="sampleName"
-				type="text"
-				maxlength="32"
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<div class="flex flex-col gap-1">
-			<label
-				for="sampleNotes"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Notes
-			</label>
-			<textarea
-				id="sampleNotes"
-				name="notes"
-				rows={3}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-y"
-			></textarea>
-		</div>
+		<TextField id="sampleName" name="sampleName" label="Sample Name" maxlength="32" />
+		<TextareaField id="sampleNotes" name="notes" label="Notes" inputClass="resize-y" />
 
 		<div class="flex items-center justify-between pt-2">
-			<button
-				type="button"
-				onclick={() => sampleDialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
-				>Cancel</button
-			>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-				>Save</button
-			>
+			<Button variant="secondary" onclick={() => (sampleDialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Save</Button>
 		</div>
 	</form>
-</dialog>
+</AppDialog>

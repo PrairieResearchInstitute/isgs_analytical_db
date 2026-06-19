@@ -1,18 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { closeOnSuccess } from '$lib/forms';
+	import AppDialog from '$lib/components/AppDialog.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import SelectField from '$lib/components/SelectField.svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import TextareaField from '$lib/components/TextareaField.svelte';
+	import TableHeader from '$lib/components/TableHeader.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let editDialog = $state<HTMLDialogElement | null>(null);
-
-	function openEdit() {
-		editDialog?.showModal();
-	}
-
-	function onDialogClick(e: MouseEvent) {
-		if (e.target === editDialog) editDialog?.close();
-	}
+	let editDialogOpen = $state(false);
 
 	function formatDate(val: string | null): string {
 		if (!val) return '—';
@@ -60,13 +59,9 @@
 			<p class="mt-1 text-sm font-sans text-il-storm">{data.visit.dt}</p>
 		{/if}
 	</div>
-	<button
-		type="button"
-		onclick={openEdit}
-		class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-	>
+	<Button onclick={() => (editDialogOpen = true)} class="inline-flex items-center gap-2">
 		Edit Visit
-	</button>
+	</Button>
 </div>
 
 <!-- Detail card -->
@@ -117,7 +112,6 @@
 			<dd class="text-il-storm-30 mt-1 sm:mt-0 whitespace-pre-wrap">{data.visit.note ?? '—'}</dd>
 		</div>
 
-		<!-- Reviewed By (conditional) -->
 		{#if data.visit.reviewedBy != null}
 			<div class="px-6 py-4 flex flex-col sm:flex-row sm:gap-8">
 				<dt
@@ -129,7 +123,6 @@
 			</div>
 		{/if}
 
-		<!-- Review Date (conditional) -->
 		{#if data.visit.reviewedDate != null}
 			<div class="px-6 py-4 flex flex-col sm:flex-row sm:gap-8">
 				<dt
@@ -144,130 +137,58 @@
 </div>
 
 <!-- Edit dialog -->
-<dialog
-	bind:this={editDialog}
-	onclick={onDialogClick}
-	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
->
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">Edit Visit</h2>
-		<button
-			type="button"
-			onclick={() => editDialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close"
-		>
-			&times;
-		</button>
-	</div>
-
+<AppDialog bind:open={editDialogOpen} title="Edit Visit">
 	<form
 		method="POST"
 		action="?/update"
-		use:enhance={() => {
-			return ({ result, update }) => {
-				if (result.type === 'success') editDialog?.close();
-				update();
-			};
-		}}
+		use:enhance={closeOnSuccess(() => (editDialogOpen = false))}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<!-- Project -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="edit-projectId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Project <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="edit-projectId"
-				name="projectId"
-				required
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select project —</option>
-				{#each data.projects as p (p.id)}
-					<option value={p.id} selected={p.id === data.visit.projectId}>{projectLabel(p)}</option>
-				{/each}
-			</select>
-		</div>
+		<SelectField
+			id="edit-projectId"
+			name="projectId"
+			label="Project"
+			required
+			value={data.visit.projectId ?? ''}
+		>
+			<option value="">— Select project —</option>
+			{#each data.projects as p (p.id)}
+				<option value={p.id} selected={p.id === data.visit.projectId}>{projectLabel(p)}</option>
+			{/each}
+		</SelectField>
 
-		<!-- Field Scientist -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="edit-by"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Field Scientist <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="edit-by"
-				name="by"
-				required
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select scientist —</option>
-				{#each data.scientists as s (s.initials)}
-					<option value={s.initials} selected={s.initials === data.visit.by}>
-						{s.initials} — {[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials}
-					</option>
-				{/each}
-			</select>
-		</div>
+		<SelectField
+			id="edit-by"
+			name="by"
+			label="Field Scientist"
+			required
+			value={data.visit.by ?? ''}
+		>
+			<option value="">— Select scientist —</option>
+			{#each data.scientists as s (s.initials)}
+				<option value={s.initials} selected={s.initials === data.visit.by}>
+					{s.initials} — {[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials}
+				</option>
+			{/each}
+		</SelectField>
 
-		<!-- Date -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="edit-dt"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Date
-			</label>
-			<input
-				id="edit-dt"
-				name="dt"
-				type="date"
-				value={data.visit.dt ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField id="edit-dt" name="dt" label="Date" type="date" value={data.visit.dt ?? ''} />
 
-		<!-- Notes -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="edit-note"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Notes
-			</label>
-			<textarea
-				id="edit-note"
-				name="note"
-				rows={3}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-none"
-				>{data.visit.note ?? ''}</textarea
-			>
-		</div>
+		<TextareaField
+			id="edit-note"
+			name="note"
+			label="Notes"
+			value={data.visit.note ?? ''}
+			inputClass="resize-none"
+		/>
 
 		<!-- Form actions -->
 		<div class="flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
-			<button
-				type="button"
-				onclick={() => editDialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
-			>
-				Cancel
-			</button>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
-				Save Changes
-			</button>
+			<Button variant="secondary" onclick={() => (editDialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Save Changes</Button>
 		</div>
 	</form>
-</dialog>
+</AppDialog>
 
 <!-- Station Visits section -->
 <div class="mt-8">
@@ -280,7 +201,7 @@
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
 			<div class="overflow-y-auto max-h-[440px]">
 				<table class="w-full text-sm font-sans">
-					<thead class="bg-il-blue text-white sticky top-0 z-10">
+					<TableHeader sticky>
 						<tr>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Station</th>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Code</th>
@@ -289,7 +210,7 @@
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Status</th>
 							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
 						</tr>
-					</thead>
+					</TableHeader>
 					<tbody>
 						{#each data.stationVisits as sv (sv.id)}
 							<tr

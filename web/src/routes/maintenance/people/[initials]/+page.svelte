@@ -1,14 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { closeOnSuccess } from '$lib/forms';
+	import AppDialog from '$lib/components/AppDialog.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import TableHeader from '$lib/components/TableHeader.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let dialog = $state<HTMLDialogElement | null>(null);
-
-	function onDialogClick(e: MouseEvent) {
-		if (e.target === dialog) dialog?.close();
-	}
+	let dialogOpen = $state(false);
 </script>
 
 <svelte:head>
@@ -23,13 +24,7 @@
 	>
 		&larr; People
 	</a>
-	<button
-		type="button"
-		onclick={() => dialog?.showModal()}
-		class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-	>
-		Edit
-	</button>
+	<Button onclick={() => (dialogOpen = true)} class="inline-flex items-center gap-2">Edit</Button>
 </div>
 
 <!-- Person detail card -->
@@ -64,13 +59,13 @@
 	{:else}
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
 			<table class="w-full text-sm font-sans">
-				<thead class="bg-il-blue text-white">
+				<TableHeader>
 					<tr>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">IDOT Name</th>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Note</th>
 					</tr>
-				</thead>
+				</TableHeader>
 				<tbody>
 					{#each data.visits as visit (visit.id)}
 						<tr
@@ -92,97 +87,45 @@
 </div>
 
 <!-- Edit dialog -->
-<dialog
-	bind:this={dialog}
-	onclick={onDialogClick}
-	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
->
-	<!-- Dialog header -->
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">Edit Person</h2>
-		<button
-			type="button"
-			onclick={() => dialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close"
-		>
-			&times;
-		</button>
-	</div>
-
-	<!-- Edit form -->
+<AppDialog bind:open={dialogOpen} title="Edit Person">
 	<form
 		method="POST"
 		action="?/update"
-		use:enhance={() =>
-			({ update }) =>
-				update().then(() => dialog?.close())}
+		use:enhance={closeOnSuccess(() => (dialogOpen = false))}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<!-- First Name -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="firstName"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				First Name
-			</label>
-			<input
-				id="firstName"
-				name="firstName"
-				type="text"
-				value={data.scientist.firstName ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- Last Name -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="lastName"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Last Name
-			</label>
-			<input
-				id="lastName"
-				name="lastName"
-				type="text"
-				value={data.scientist.lastName ?? ''}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
+		<TextField
+			id="firstName"
+			name="firstName"
+			label="First Name"
+			value={data.scientist.firstName ?? ''}
+		/>
+		<TextField
+			id="lastName"
+			name="lastName"
+			label="Last Name"
+			value={data.scientist.lastName ?? ''}
+		/>
 
 		<!-- Form actions -->
 		<div class="flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
-			<button
-				type="button"
-				onclick={() => dialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
-			>
-				Cancel
-			</button>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
-				Save Changes
-			</button>
+			<Button variant="secondary" onclick={() => (dialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Save Changes</Button>
 		</div>
 	</form>
 
 	<!-- Delete form -->
 	<div class="px-6 pb-5">
 		<form method="POST" action="?/delete" use:enhance>
-			<button
+			<Button
 				type="submit"
-				class="text-sm font-sans font-semibold text-red-600 hover:text-red-800 underline transition-colors"
+				variant="danger"
 				onclick={(e) => {
 					if (!confirm('Delete this person? This cannot be undone.')) e.preventDefault();
 				}}
 			>
 				Delete Person
-			</button>
+			</Button>
 		</form>
 	</div>
-</dialog>
+</AppDialog>

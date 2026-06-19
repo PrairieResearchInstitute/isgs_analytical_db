@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import Button from '$lib/components/Button.svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import TextareaField from '$lib/components/TextareaField.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -72,13 +75,7 @@
 	<div class="px-6 py-4 bg-il-storm-95 border-b border-il-cloud flex items-center justify-between">
 		<h2 class="font-heading font-semibold text-base text-il-blue">Sample Details</h2>
 		{#if !isEditing}
-			<button
-				type="button"
-				onclick={() => (isEditing = true)}
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-1.5 rounded transition-opacity"
-			>
-				Edit
-			</button>
+			<Button onclick={() => (isEditing = true)} class="py-1.5">Edit</Button>
 		{/if}
 	</div>
 
@@ -137,159 +134,71 @@
 		</div>
 	{:else}
 		<form method="POST" action="?/updateSample" use:enhance class="px-6 py-5 flex flex-col gap-4">
-			<!-- Sample Name -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="sampleName"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Sample Name
-				</label>
-				<input
-					id="sampleName"
-					name="sampleName"
-					type="text"
-					maxlength="32"
-					value={data.sample.sampleName ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
-
-			<!-- Notes -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="sampleNotes"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Notes
-				</label>
-				<textarea
-					id="sampleNotes"
-					name="notes"
-					rows={3}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-y max-w-lg"
-					>{data.sample.notes ?? ''}</textarea
-				>
-			</div>
-
-			<!-- Pump Type -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="pumpType"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Pump Type
-				</label>
-				<input
-					id="pumpType"
-					name="pumpType"
-					type="text"
-					value={data.sample.pumpType ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
-
-			<!-- Flow Rate -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="flowRate"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Flow Rate (ml/min)
-				</label>
-				<input
-					id="flowRate"
-					name="flowRate"
-					type="number"
-					step="0.1"
-					value={data.sample.flowRate ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
-
-			<!-- Final Flow Rate -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="finalFlowRate"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Final Flow Rate (ml/min)
-				</label>
-				<input
-					id="finalFlowRate"
-					name="finalFlowRate"
-					type="number"
-					step="0.1"
-					value={data.sample.finalFlowRate ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
-
-			<!-- Tubing Type -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="tubingType"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Tubing Type
-				</label>
-				<input
-					id="tubingType"
-					name="tubingType"
-					type="text"
-					value={data.sample.tubingType ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
-
-			<!-- Device Model -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="deviceModel"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Device Model
-				</label>
-				<input
-					id="deviceModel"
-					name="deviceModel"
-					type="text"
-					value={data.sample.deviceModel ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
-
-			<!-- Device SN -->
-			<div class="flex flex-col gap-1">
-				<label
-					for="deviceSn"
-					class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-				>
-					Device SN
-				</label>
-				<input
-					id="deviceSn"
-					name="deviceSn"
-					type="text"
-					value={data.sample.deviceSn ?? ''}
-					class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue max-w-xs"
-				/>
-			</div>
+			<TextField
+				id="sampleName"
+				name="sampleName"
+				label="Sample Name"
+				maxlength="32"
+				value={data.sample.sampleName ?? ''}
+				inputClass="max-w-xs"
+			/>
+			<TextareaField
+				id="sampleNotes"
+				name="notes"
+				label="Notes"
+				value={data.sample.notes ?? ''}
+				inputClass="resize-y max-w-lg"
+			/>
+			<TextField
+				id="pumpType"
+				name="pumpType"
+				label="Pump Type"
+				value={data.sample.pumpType ?? ''}
+				inputClass="max-w-xs"
+			/>
+			<TextField
+				id="flowRate"
+				name="flowRate"
+				label="Flow Rate (ml/min)"
+				type="number"
+				step="0.1"
+				value={data.sample.flowRate ?? ''}
+				inputClass="max-w-xs"
+			/>
+			<TextField
+				id="finalFlowRate"
+				name="finalFlowRate"
+				label="Final Flow Rate (ml/min)"
+				type="number"
+				step="0.1"
+				value={data.sample.finalFlowRate ?? ''}
+				inputClass="max-w-xs"
+			/>
+			<TextField
+				id="tubingType"
+				name="tubingType"
+				label="Tubing Type"
+				value={data.sample.tubingType ?? ''}
+				inputClass="max-w-xs"
+			/>
+			<TextField
+				id="deviceModel"
+				name="deviceModel"
+				label="Device Model"
+				value={data.sample.deviceModel ?? ''}
+				inputClass="max-w-xs"
+			/>
+			<TextField
+				id="deviceSn"
+				name="deviceSn"
+				label="Device SN"
+				value={data.sample.deviceSn ?? ''}
+				inputClass="max-w-xs"
+			/>
 
 			<div class="flex items-center gap-4 pt-2">
-				<button
-					type="submit"
-					class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-				>
-					Save
-				</button>
-				<button
-					type="button"
-					onclick={() => (isEditing = false)}
-					class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
-				>
-					Cancel
-				</button>
+				<Button type="submit" class="px-5">Save</Button>
+				<Button variant="secondary" onclick={() => (isEditing = false)}>Cancel</Button>
 			</div>
 		</form>
 	{/if}
@@ -390,13 +299,8 @@
 		</div>
 
 		<div class="flex pt-2">
-			<button
-				type="submit"
-				disabled={!selectedFile}
-				class="bg-il-blue hover:opacity-90 disabled:opacity-40 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
+			<Button type="submit" disabled={!selectedFile} class="px-5 disabled:opacity-40">Upload</Button
 			>
-				Upload
-			</button>
 		</div>
 	</form>
 </div>
@@ -462,7 +366,5 @@
 
 <!-- Delete section -->
 <form method="POST" action="?/deleteSample" use:enhance>
-	<button type="submit" class="text-xs font-sans font-semibold text-red-600 hover:underline">
-		Delete sample
-	</button>
+	<Button type="submit" variant="danger" class="text-xs">Delete sample</Button>
 </form>

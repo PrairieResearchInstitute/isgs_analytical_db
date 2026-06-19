@@ -1,18 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { closeOnSuccess } from '$lib/forms';
+	import AppDialog from '$lib/components/AppDialog.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import SelectField from '$lib/components/SelectField.svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import TextareaField from '$lib/components/TextareaField.svelte';
+	import TableHeader from '$lib/components/TableHeader.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let dialog = $state<HTMLDialogElement | null>(null);
-
-	function openCreate() {
-		dialog?.showModal();
-	}
-
-	function onDialogClick(e: MouseEvent) {
-		if (e.target === dialog) dialog?.close();
-	}
+	let dialogOpen = $state(false);
 
 	function formatDate(val: string | null): string {
 		if (!val) return '—';
@@ -51,13 +50,9 @@
 			{data.visits.length}
 		</span>
 	</div>
-	<button
-		type="button"
-		onclick={openCreate}
-		class="inline-flex items-center gap-2 bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-4 py-2 rounded transition-opacity"
-	>
+	<Button onclick={() => (dialogOpen = true)} class="inline-flex items-center gap-2">
 		+ New Visit
-	</button>
+	</Button>
 </div>
 
 <!-- Visits table -->
@@ -68,7 +63,7 @@
 {:else}
 	<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
 		<table class="w-full text-sm font-sans">
-			<thead class="bg-il-blue text-white">
+			<TableHeader>
 				<tr>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Project</th>
@@ -77,7 +72,7 @@
 					>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Notes</th>
 				</tr>
-			</thead>
+			</TableHeader>
 			<tbody>
 				{#each data.visits as visit (visit.id)}
 					<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
@@ -99,111 +94,37 @@
 {/if}
 
 <!-- Create dialog -->
-<dialog
-	bind:this={dialog}
-	onclick={onDialogClick}
-	class="w-full max-w-lg rounded-lg shadow-xl bg-white p-0 border border-il-cloud backdrop:bg-black/40 open:flex open:flex-col"
->
-	<!-- Dialog header -->
-	<div class="flex items-center justify-between px-6 py-4 border-b border-il-cloud bg-il-storm-95">
-		<h2 class="font-heading font-bold text-xl text-il-blue">New Visit</h2>
-		<button
-			type="button"
-			onclick={() => dialog?.close()}
-			class="text-il-storm hover:text-il-blue text-2xl leading-none font-sans"
-			aria-label="Close"
-		>
-			&times;
-		</button>
-	</div>
+<AppDialog bind:open={dialogOpen} title="New Visit">
+	<form
+		method="POST"
+		action="?/create"
+		use:enhance={closeOnSuccess(() => (dialogOpen = false))}
+		class="px-6 py-5 flex flex-col gap-4"
+	>
+		<SelectField id="projectId" name="projectId" label="Project" required>
+			<option value="">— Select project —</option>
+			{#each data.projects as p (p.id)}
+				<option value={p.id}>{projectLabel(p)}</option>
+			{/each}
+		</SelectField>
 
-	<!-- Create form -->
-	<form method="POST" action="?/create" use:enhance class="px-6 py-5 flex flex-col gap-4">
-		<!-- Project -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="projectId"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Project <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="projectId"
-				name="projectId"
-				required
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select project —</option>
-				{#each data.projects as p (p.id)}
-					<option value={p.id}>{projectLabel(p)}</option>
-				{/each}
-			</select>
-		</div>
+		<SelectField id="by" name="by" label="Field Scientist" required>
+			<option value="">— Select scientist —</option>
+			{#each data.scientists as s (s.initials)}
+				<option value={s.initials}>
+					{s.initials} — {[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials}
+				</option>
+			{/each}
+		</SelectField>
 
-		<!-- Field Scientist -->
-		<div class="flex flex-col gap-1">
-			<label for="by" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
-				Field Scientist <span class="text-il-orange">*</span>
-			</label>
-			<select
-				id="by"
-				name="by"
-				required
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			>
-				<option value="">— Select scientist —</option>
-				{#each data.scientists as s (s.initials)}
-					<option value={s.initials}>
-						{s.initials} — {[s.firstName, s.lastName].filter(Boolean).join(' ') || s.initials}
-					</option>
-				{/each}
-			</select>
-		</div>
+		<TextField id="dt" name="dt" label="Date" type="date" />
 
-		<!-- Date -->
-		<div class="flex flex-col gap-1">
-			<label for="dt" class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
-				Date
-			</label>
-			<input
-				id="dt"
-				name="dt"
-				type="date"
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue"
-			/>
-		</div>
-
-		<!-- Notes -->
-		<div class="flex flex-col gap-1">
-			<label
-				for="note"
-				class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide"
-			>
-				Notes
-			</label>
-			<textarea
-				id="note"
-				name="note"
-				rows={3}
-				class="border border-il-cloud rounded px-3 py-2 text-sm font-sans text-il-storm-30 bg-white focus:outline-none focus:ring-2 focus:ring-il-blue resize-none"
-			></textarea>
-		</div>
+		<TextareaField id="note" name="note" label="Notes" inputClass="resize-none" />
 
 		<!-- Form actions -->
 		<div class="flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
-			<button
-				type="button"
-				onclick={() => dialog?.close()}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue px-4 py-2 rounded transition-colors"
-			>
-				Cancel
-			</button>
-			<button
-				type="submit"
-				class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-			>
-				Create Visit
-			</button>
+			<Button variant="secondary" onclick={() => (dialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Create Visit</Button>
 		</div>
 	</form>
-</dialog>
+</AppDialog>

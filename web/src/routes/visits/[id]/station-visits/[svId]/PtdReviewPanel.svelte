@@ -4,6 +4,7 @@
 	import { untrack } from 'svelte';
 	import { createVirtualizer } from '@tanstack/svelte-virtual';
 	import { get } from 'svelte/store';
+	import Button from '$lib/components/Button.svelte';
 
 	type PtdRecord = {
 		id: number;
@@ -273,13 +274,7 @@
 			report
 		</p>
 		<div class="flex items-center gap-3">
-			<button
-				type="button"
-				onclick={onclose}
-				class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
-			>
-				Cancel
-			</button>
+			<Button variant="secondary" onclick={onclose}>Cancel</Button>
 			<form
 				method="POST"
 				action="?/updatePtdExclusions"
@@ -293,12 +288,7 @@
 			>
 				<input type="hidden" name="excludedIds" value={JSON.stringify(nowExcluded)} />
 				<input type="hidden" name="includedIds" value={JSON.stringify(nowIncluded)} />
-				<button
-					type="submit"
-					class="bg-il-blue hover:opacity-90 text-white font-sans font-semibold text-sm px-5 py-2 rounded transition-opacity"
-				>
-					Save
-				</button>
+				<Button type="submit" class="px-5">Save</Button>
 			</form>
 		</div>
 	</div>
