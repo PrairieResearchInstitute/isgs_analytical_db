@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { closeOnSuccess } from '$lib/forms';
+	import { formatDate } from '$lib/format';
 	import AppDialog from '$lib/components/AppDialog.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import TextField from '$lib/components/TextField.svelte';
@@ -24,11 +25,6 @@
 	function openEditStation(station: (typeof data.stations)[0]) {
 		editingStation = station;
 		stationDialogOpen = true;
-	}
-
-	function formatDate(val: string | null): string {
-		if (!val) return '—';
-		return val;
 	}
 </script>
 
