@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { closeOnSuccess } from '$lib/forms';
+	import { formatDate } from '$lib/format';
 	import AppDialog from '$lib/components/AppDialog.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import SelectField from '$lib/components/SelectField.svelte';
@@ -12,11 +13,6 @@
 	let { data }: { data: PageData } = $props();
 
 	let editDialogOpen = $state(false);
-
-	function formatDate(val: string | null): string {
-		if (!val) return '—';
-		return val;
-	}
 
 	function scientistLabel(
 		first: string | null,
