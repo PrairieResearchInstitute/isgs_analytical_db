@@ -180,7 +180,7 @@
 						>
 							<td class="px-4 py-3 whitespace-nowrap">
 								<a href="/visits/{visit.id}" class="text-il-blue hover:underline font-semibold">
-									{visit.dt ?? '—'}
+									{formatDate(visit.dt)}
 								</a>
 							</td>
 							<td class="px-4 py-3 font-semibold">
