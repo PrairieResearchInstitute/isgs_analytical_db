@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { closeOnSuccess } from '$lib/forms';
+	import { formatDate } from '$lib/format';
 	import AppDialog from '$lib/components/AppDialog.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import TextField from '$lib/components/TextField.svelte';
@@ -71,7 +72,7 @@
 						<tr
 							class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
 						>
-							<td class="px-4 py-3 text-il-storm">{visit.dt ?? '—'}</td>
+							<td class="px-4 py-3 text-il-storm">{formatDate(visit.dt)}</td>
 							<td class="px-4 py-3 font-semibold">
 								<a href="/projects/{visit.projectId}" class="text-il-blue hover:underline">
 									{visit.idotName ?? '—'}
