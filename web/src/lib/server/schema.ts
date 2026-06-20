@@ -11,19 +11,6 @@ import {
 	boolean,
 	foreignKey
 } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
-
-export const sites = pgTable('sites', {
-	id: serial('id').primaryKey(),
-	name: text('name').notNull(),
-	location: text('location'),
-	latitude: doublePrecision('latitude'),
-	longitude: doublePrecision('longitude'),
-	createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`)
-});
-
-export type Site = typeof sites.$inferSelect;
-export type NewSite = typeof sites.$inferInsert;
 
 export const lutSiteType = pgTable('lut_site_type', {
 	id: integer('id').primaryKey(),
@@ -35,7 +22,7 @@ export const lutCountyNames = pgTable('lut_county_names', {
 	cntyname: text('cntyname')
 });
 
-export const projects = pgTable('projects', {
+export const sites = pgTable('sites', {
 	id: serial('id').primaryKey(),
 	isgsNum: text('isgs_num'),
 	idotName: text('idot_name'),
@@ -56,9 +43,9 @@ export const lutcInitials = pgTable('lutc_initials', {
 
 export const visits = pgTable('visits', {
 	id: serial('id').primaryKey(),
-	projectId: integer('project_id')
+	siteId: integer('site_id')
 		.notNull()
-		.references(() => projects.id),
+		.references(() => sites.id),
 	dt: text('dt'),
 	by: text('by')
 		.notNull()
@@ -113,9 +100,9 @@ export const lutStatus = pgTable('lut_status', {
 
 export const stations = pgTable('stations', {
 	id: serial('id').primaryKey(),
-	projectId: integer('project_id')
+	siteId: integer('site_id')
 		.notNull()
-		.references(() => projects.id),
+		.references(() => sites.id),
 	typeId: integer('type_id')
 		.notNull()
 		.references(() => lutStationType.id),
@@ -141,8 +128,8 @@ export const stations = pgTable('stations', {
 
 export type LutSiteType = typeof lutSiteType.$inferSelect;
 export type LutCountyName = typeof lutCountyNames.$inferSelect;
-export type Project = typeof projects.$inferSelect;
-export type NewProject = typeof projects.$inferInsert;
+export type Site = typeof sites.$inferSelect;
+export type NewSite = typeof sites.$inferInsert;
 export type LutcInitials = typeof lutcInitials.$inferSelect;
 export type Visit = typeof visits.$inferSelect;
 export type NewVisit = typeof visits.$inferInsert;

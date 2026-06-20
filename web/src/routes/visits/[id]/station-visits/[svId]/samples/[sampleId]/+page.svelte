@@ -57,9 +57,9 @@
 	<div class="px-6 py-5 flex flex-col gap-3">
 		<div class="flex flex-col gap-0.5">
 			<span class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">
-				Project
+				Site
 			</span>
-			<span class="text-sm font-sans text-il-storm-30">{data.projectName ?? '—'}</span>
+			<span class="text-sm font-sans text-il-storm-30">{data.siteName ?? '—'}</span>
 		</div>
 		<div class="flex flex-col gap-0.5">
 			<span class="text-xs font-semibold font-sans text-il-storm uppercase tracking-wide">

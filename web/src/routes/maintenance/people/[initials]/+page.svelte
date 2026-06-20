@@ -74,7 +74,7 @@
 						>
 							<td class="px-4 py-3 text-il-storm">{formatDate(visit.dt)}</td>
 							<td class="px-4 py-3 font-semibold">
-								<a href="/projects/{visit.projectId}" class="text-il-blue hover:underline">
+								<a href="/sites/{visit.siteId}" class="text-il-blue hover:underline">
 									{visit.idotName ?? '—'}
 								</a>
 							</td>

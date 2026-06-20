@@ -40,8 +40,8 @@
 		return sortDir === 'asc' ? '↑' : '↓';
 	}
 
-	const sortedProjects = $derived(
-		[...data.projects].sort((a, b) => {
+	const sortedSites = $derived(
+		[...data.sites].sort((a, b) => {
 			const av = a[sortKey];
 			const bv = b[sortKey];
 			if (av == null && bv == null) return 0;
@@ -57,28 +57,28 @@
 </script>
 
 <svelte:head>
-	<title>Projects | IDOT Wetlands Data</title>
+	<title>Sites | IDOT Wetlands Data</title>
 </svelte:head>
 
 <!-- Header bar -->
 <div class="flex items-center justify-between mb-6">
 	<div class="flex items-center gap-3">
-		<h1 class="font-heading font-bold text-3xl text-il-blue">Projects</h1>
+		<h1 class="font-heading font-bold text-3xl text-il-blue">Sites</h1>
 		<span
 			class="inline-flex items-center justify-center rounded-full bg-il-blue text-white text-xs font-semibold font-sans px-2.5 py-0.5 min-w-[1.5rem]"
 		>
-			{data.projects.length}
+			{data.sites.length}
 		</span>
 	</div>
 	<Button onclick={() => (dialogOpen = true)} class="inline-flex items-center gap-2">
-		+ New Project
+		+ New Site
 	</Button>
 </div>
 
-<!-- Projects table -->
-{#if data.projects.length === 0}
+<!-- Sites table -->
+{#if data.sites.length === 0}
 	<div class="border-2 border-il-cloud rounded p-12 text-center text-il-storm font-sans">
-		No projects yet. Click <strong>+ New Project</strong> to add one.
+		No sites yet. Click <strong>+ New Site</strong> to add one.
 	</div>
 {:else}
 	<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
@@ -160,20 +160,20 @@
 				</tr>
 			</TableHeader>
 			<tbody>
-				{#each sortedProjects as project (project.id)}
+				{#each sortedSites as site (site.id)}
 					<tr class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors">
-						<td class="px-4 py-3 font-mono text-il-storm-30">{project.isgsNum ?? '—'}</td>
+						<td class="px-4 py-3 font-mono text-il-storm-30">{site.isgsNum ?? '—'}</td>
 						<td class="px-4 py-3 font-semibold">
-							<a href="/projects/{project.id}" class="text-il-blue hover:underline">
-								{project.idotName ?? '—'}
+							<a href="/sites/{site.id}" class="text-il-blue hover:underline">
+								{site.idotName ?? '—'}
 							</a>
 						</td>
-						<td class="px-4 py-3 text-il-storm-30">{project.isgsName ?? '—'}</td>
-						<td class="px-4 py-3 text-il-storm">{project.countyName ?? '—'}</td>
-						<td class="px-4 py-3 text-il-storm">{project.siteType ?? '—'}</td>
-						<td class="px-4 py-3 text-il-storm">{formatDate(project.beginDt)}</td>
-						<td class="px-4 py-3 text-il-storm">{formatDate(project.endDt)}</td>
-						<td class="px-4 py-3 text-il-storm">{project.visitCount}</td>
+						<td class="px-4 py-3 text-il-storm-30">{site.isgsName ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm">{site.countyName ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm">{site.siteType ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm">{formatDate(site.beginDt)}</td>
+						<td class="px-4 py-3 text-il-storm">{formatDate(site.endDt)}</td>
+						<td class="px-4 py-3 text-il-storm">{site.visitCount}</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -182,7 +182,7 @@
 {/if}
 
 <!-- Create dialog -->
-<AppDialog bind:open={dialogOpen} title="New Project" maxWidth="max-w-2xl">
+<AppDialog bind:open={dialogOpen} title="New Site" maxWidth="max-w-2xl">
 	<form
 		method="POST"
 		action="?/create"
@@ -215,7 +215,7 @@
 		<!-- Form actions -->
 		<div class="col-span-2 flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
 			<Button variant="secondary" onclick={() => (dialogOpen = false)}>Cancel</Button>
-			<Button type="submit" class="px-5">Create Project</Button>
+			<Button type="submit" class="px-5">Create Site</Button>
 		</div>
 	</form>
 </AppDialog>

@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db';
 import {
 	visits,
-	projects,
+	sites,
 	lutcInitials,
 	stations,
 	stationVisits,
@@ -15,13 +15,13 @@ export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id);
 	if (isNaN(id)) throw error(404, 'Visit not found');
 
-	const [rows, svRows, allProjects, scientists] = await Promise.all([
+	const [rows, svRows, allSites, scientists] = await Promise.all([
 		db
 			.select({
 				id: visits.id,
 				dt: visits.dt,
-				projectId: visits.projectId,
-				projectName: projects.idotName,
+				siteId: visits.siteId,
+				siteName: sites.idotName,
 				by: visits.by,
 				scientistFirst: lutcInitials.firstName,
 				scientistLast: lutcInitials.lastName,
@@ -30,7 +30,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				reviewedDate: visits.reviewedDate
 			})
 			.from(visits)
-			.leftJoin(projects, eq(visits.projectId, projects.id))
+			.leftJoin(sites, eq(visits.siteId, sites.id))
 			.leftJoin(lutcInitials, eq(visits.by, lutcInitials.initials))
 			.where(eq(visits.id, id))
 			.limit(1),
@@ -52,9 +52,9 @@ export const load: PageServerLoad = async ({ params }) => {
 			.where(eq(stationVisits.visitId, id))
 			.orderBy(asc(stations.staName)),
 		db
-			.select({ id: projects.id, idotName: projects.idotName, isgsNum: projects.isgsNum })
-			.from(projects)
-			.orderBy(asc(projects.idotName)),
+			.select({ id: sites.id, idotName: sites.idotName, isgsNum: sites.isgsNum })
+			.from(sites)
+			.orderBy(asc(sites.idotName)),
 		db.select().from(lutcInitials).orderBy(asc(lutcInitials.lastName), asc(lutcInitials.firstName))
 	]);
 
@@ -63,7 +63,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		visit: rows[0],
 		stationVisits: svRows,
-		projects: allProjects,
+		sites: allSites,
 		scientists
 	};
 };
@@ -74,19 +74,19 @@ export const actions: Actions = {
 		if (isNaN(id)) return fail(400, { error: 'Invalid visit id' });
 
 		const data = await request.formData();
-		const projectIdRaw = data.get('projectId') as string;
+		const siteIdRaw = data.get('siteId') as string;
 		const by = (data.get('by') as string)?.trim();
 
-		if (!projectIdRaw) return fail(400, { error: 'Project is required' });
+		if (!siteIdRaw) return fail(400, { error: 'Site is required' });
 		if (!by) return fail(400, { error: 'Field Scientist is required' });
 
-		const projectId = parseInt(projectIdRaw);
-		if (isNaN(projectId)) return fail(400, { error: 'Invalid project' });
+		const siteId = parseInt(siteIdRaw);
+		if (isNaN(siteId)) return fail(400, { error: 'Invalid site' });
 
 		await db
 			.update(visits)
 			.set({
-				projectId,
+				siteId,
 				by,
 				dt: (data.get('dt') as string) || null,
 				note: (data.get('note') as string) || null

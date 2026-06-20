@@ -24,12 +24,8 @@
 		return name || initials || '—';
 	}
 
-	function projectLabel(p: {
-		id: number;
-		idotName: string | null;
-		isgsNum: string | null;
-	}): string {
-		return p.idotName ?? p.isgsNum ?? `Project ${p.id}`;
+	function siteLabel(p: { id: number; idotName: string | null; isgsNum: string | null }): string {
+		return p.idotName ?? p.isgsNum ?? `Site ${p.id}`;
 	}
 </script>
 
@@ -66,18 +62,18 @@
 		<h2 class="font-heading font-semibold text-base text-il-blue">Visit Details</h2>
 	</div>
 	<dl class="divide-y divide-il-cloud font-sans">
-		<!-- Project -->
+		<!-- Site -->
 		<div class="px-6 py-4 flex flex-col sm:flex-row sm:gap-8">
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide w-40 shrink-0 pt-0.5">
-				Project
+				Site
 			</dt>
 			<dd class="text-il-storm-30 mt-1 sm:mt-0">
-				{#if data.visit.projectId}
-					<a href="/projects/{data.visit.projectId}" class="text-il-blue hover:underline">
-						{data.visit.projectName ?? `Project ${data.visit.projectId}`}
+				{#if data.visit.siteId}
+					<a href="/sites/{data.visit.siteId}" class="text-il-blue hover:underline">
+						{data.visit.siteName ?? `Site ${data.visit.siteId}`}
 					</a>
 				{:else}
-					{data.visit.projectName ?? '—'}
+					{data.visit.siteName ?? '—'}
 				{/if}
 			</dd>
 		</div>
@@ -141,15 +137,15 @@
 		class="px-6 py-5 flex flex-col gap-4"
 	>
 		<SelectField
-			id="edit-projectId"
-			name="projectId"
-			label="Project"
+			id="edit-siteId"
+			name="siteId"
+			label="Site"
 			required
-			value={data.visit.projectId ?? ''}
+			value={data.visit.siteId ?? ''}
 		>
-			<option value="">— Select project —</option>
-			{#each data.projects as p (p.id)}
-				<option value={p.id} selected={p.id === data.visit.projectId}>{projectLabel(p)}</option>
+			<option value="">— Select site —</option>
+			{#each data.sites as p (p.id)}
+				<option value={p.id} selected={p.id === data.visit.siteId}>{siteLabel(p)}</option>
 			{/each}
 		</SelectField>
 
