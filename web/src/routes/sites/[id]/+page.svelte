@@ -29,7 +29,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.project.idotName ?? 'Project'} | IDOT Wetlands Data</title>
+	<title>{data.site.idotName ?? 'Site'} | IDOT Wetlands Data</title>
 </svelte:head>
 
 <!-- Top bar -->
@@ -38,49 +38,49 @@
 		href="/"
 		class="text-sm font-sans font-semibold text-il-storm hover:text-il-blue transition-colors"
 	>
-		← Projects
+		← Sites
 	</a>
 	<Button onclick={() => (dialogOpen = true)} class="inline-flex items-center gap-2">Edit</Button>
 </div>
 
-<!-- Project detail card -->
+<!-- Site detail card -->
 <div class="border border-il-cloud rounded-lg shadow-sm bg-white overflow-hidden">
 	<div class="px-6 py-4 bg-il-storm-95 border-b border-il-cloud">
-		<h1 class="font-heading font-bold text-2xl text-il-blue">{data.project.idotName ?? '—'}</h1>
+		<h1 class="font-heading font-bold text-2xl text-il-blue">{data.site.idotName ?? '—'}</h1>
 	</div>
 
 	<dl class="grid grid-cols-2 gap-x-8 gap-y-5 px-6 py-5 font-sans">
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">ISGS #</dt>
-			<dd class="font-mono text-il-storm-30">{data.project.isgsNum ?? '—'}</dd>
+			<dd class="font-mono text-il-storm-30">{data.site.isgsNum ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">ISGS Name</dt>
-			<dd class="text-il-storm-30">{data.project.isgsName ?? '—'}</dd>
+			<dd class="text-il-storm-30">{data.site.isgsName ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">FA #</dt>
-			<dd class="text-il-storm-30">{data.project.faNum ?? '—'}</dd>
+			<dd class="text-il-storm-30">{data.site.faNum ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">County</dt>
-			<dd class="text-il-storm-30">{data.project.countyName ?? '—'}</dd>
+			<dd class="text-il-storm-30">{data.site.countyName ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">Type</dt>
-			<dd class="text-il-storm-30">{data.project.siteType ?? '—'}</dd>
+			<dd class="text-il-storm-30">{data.site.siteType ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">Seq Code</dt>
-			<dd class="text-il-storm-30">{data.project.seqCode ?? '—'}</dd>
+			<dd class="text-il-storm-30">{data.site.seqCode ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">Begin Date</dt>
-			<dd class="text-il-storm-30">{formatDate(data.project.beginDt)}</dd>
+			<dd class="text-il-storm-30">{formatDate(data.site.beginDt)}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">End Date</dt>
-			<dd class="text-il-storm-30">{formatDate(data.project.endDt)}</dd>
+			<dd class="text-il-storm-30">{formatDate(data.site.endDt)}</dd>
 		</div>
 	</dl>
 </div>
@@ -93,7 +93,7 @@
 	</div>
 	{#if data.stations.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
-			No stations recorded for this project.
+			No stations recorded for this site.
 		</div>
 	{:else}
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
@@ -159,7 +159,7 @@
 	</div>
 	{#if data.visits.length === 0}
 		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
-			No visits recorded for this project.
+			No visits recorded for this site.
 		</div>
 	{:else}
 		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
@@ -197,52 +197,41 @@
 	{/if}
 </div>
 
-<!-- Edit project dialog -->
-<AppDialog bind:open={dialogOpen} title="Edit Project" maxWidth="max-w-2xl">
+<!-- Edit site dialog -->
+<AppDialog bind:open={dialogOpen} title="Edit Site" maxWidth="max-w-2xl">
 	<form
 		method="POST"
 		action="?/update"
 		use:enhance={closeOnSuccess(() => (dialogOpen = false))}
 		class="px-6 py-5 grid grid-cols-2 gap-x-5 gap-y-4"
 	>
-		<TextField id="isgsNum" name="isgsNum" label="ISGS #" value={data.project.isgsNum ?? ''} />
+		<TextField id="isgsNum" name="isgsNum" label="ISGS #" value={data.site.isgsNum ?? ''} />
 		<TextField
 			id="idotName"
 			name="idotName"
 			label="IDOT Name"
 			required
-			value={data.project.idotName ?? ''}
+			value={data.site.idotName ?? ''}
 		/>
-		<TextField
-			id="isgsName"
-			name="isgsName"
-			label="ISGS Name"
-			value={data.project.isgsName ?? ''}
-		/>
-		<TextField id="faNum" name="faNum" label="FA #" value={data.project.faNum ?? ''} />
+		<TextField id="isgsName" name="isgsName" label="ISGS Name" value={data.site.isgsName ?? ''} />
+		<TextField id="faNum" name="faNum" label="FA #" value={data.site.faNum ?? ''} />
 		<TextField
 			id="beginDt"
 			name="beginDt"
 			label="Begin Date"
 			type="date"
-			value={data.project.beginDt ?? ''}
+			value={data.site.beginDt ?? ''}
 		/>
-		<TextField
-			id="endDt"
-			name="endDt"
-			label="End Date"
-			type="date"
-			value={data.project.endDt ?? ''}
-		/>
+		<TextField id="endDt" name="endDt" label="End Date" type="date" value={data.site.endDt ?? ''} />
 
-		<SelectField id="county" name="county" label="County" value={data.project.county ?? ''}>
+		<SelectField id="county" name="county" label="County" value={data.site.county ?? ''}>
 			<option value="">— Select county —</option>
 			{#each data.counties as c (c.cntycode)}
 				<option value={c.cntycode}>{c.cntyname}</option>
 			{/each}
 		</SelectField>
 
-		<SelectField id="typeId" name="typeId" label="Type" value={data.project.typeId ?? ''}>
+		<SelectField id="typeId" name="typeId" label="Type" value={data.site.typeId ?? ''}>
 			<option value="">— Select type —</option>
 			{#each data.siteTypes as st (st.id)}
 				<option value={st.id}>{st.siteType}</option>
@@ -254,7 +243,7 @@
 			name="seqCode"
 			label="Seq Code"
 			class="col-span-2"
-			value={data.project.seqCode ?? ''}
+			value={data.site.seqCode ?? ''}
 		/>
 
 		<!-- Form actions -->
@@ -271,10 +260,10 @@
 				type="submit"
 				variant="danger"
 				onclick={(e) => {
-					if (!confirm('Delete this project? This cannot be undone.')) e.preventDefault();
+					if (!confirm('Delete this site? This cannot be undone.')) e.preventDefault();
 				}}
 			>
-				Delete Project
+				Delete Site
 			</Button>
 		</form>
 	</div>

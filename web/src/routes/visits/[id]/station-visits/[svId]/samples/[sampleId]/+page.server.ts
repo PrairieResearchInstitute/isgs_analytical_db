@@ -4,7 +4,7 @@ import {
 	stationVisits,
 	stations,
 	visits,
-	projects,
+	sites,
 	sondeImportQueue,
 	sondeData
 } from '$lib/server/schema';
@@ -25,12 +25,12 @@ export const load: PageServerLoad = async ({ params }) => {
 			.select({
 				stationName: stations.staName,
 				visitId: stationVisits.visitId,
-				projectName: projects.idotName
+				siteName: sites.idotName
 			})
 			.from(stationVisits)
 			.leftJoin(stations, eq(stationVisits.stationId, stations.id))
 			.leftJoin(visits, eq(stationVisits.visitId, visits.id))
-			.leftJoin(projects, eq(visits.projectId, projects.id))
+			.leftJoin(sites, eq(visits.siteId, sites.id))
 			.where(eq(stationVisits.id, svId))
 			.limit(1),
 		db
@@ -46,7 +46,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		sample: sampleRows[0],
 		stationName: svRows[0].stationName,
-		projectName: svRows[0].projectName,
+		siteName: svRows[0].siteName,
 		visitId,
 		svId,
 		sondeRows

@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import {
-	projects,
+	sites,
 	lutSiteType,
 	lutCountyNames,
 	visits,
@@ -26,8 +26,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		rows,
 		siteTypes,
 		counties,
-		projectVisits,
-		projectStations,
+		siteVisits,
+		siteStations,
 		stationTypes,
 		locationTypes,
 		scientists,
@@ -38,23 +38,23 @@ export const load: PageServerLoad = async ({ params }) => {
 	] = await Promise.all([
 		db
 			.select({
-				id: projects.id,
-				isgsNum: projects.isgsNum,
-				idotName: projects.idotName,
-				isgsName: projects.isgsName,
-				beginDt: projects.beginDt,
-				endDt: projects.endDt,
-				faNum: projects.faNum,
-				county: projects.county,
+				id: sites.id,
+				isgsNum: sites.isgsNum,
+				idotName: sites.idotName,
+				isgsName: sites.isgsName,
+				beginDt: sites.beginDt,
+				endDt: sites.endDt,
+				faNum: sites.faNum,
+				county: sites.county,
 				countyName: lutCountyNames.cntyname,
-				typeId: projects.typeId,
-				seqCode: projects.seqCode,
+				typeId: sites.typeId,
+				seqCode: sites.seqCode,
 				siteType: lutSiteType.siteType
 			})
-			.from(projects)
-			.leftJoin(lutSiteType, eq(projects.typeId, lutSiteType.id))
-			.leftJoin(lutCountyNames, eq(projects.county, lutCountyNames.cntycode))
-			.where(eq(projects.id, id)),
+			.from(sites)
+			.leftJoin(lutSiteType, eq(sites.typeId, lutSiteType.id))
+			.leftJoin(lutCountyNames, eq(sites.county, lutCountyNames.cntycode))
+			.where(eq(sites.id, id)),
 		db.select().from(lutSiteType).orderBy(lutSiteType.siteType),
 		db.select().from(lutCountyNames).orderBy(lutCountyNames.cntyname),
 		db
@@ -68,7 +68,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			})
 			.from(visits)
 			.leftJoin(lutcInitials, eq(visits.by, lutcInitials.initials))
-			.where(eq(visits.projectId, id))
+			.where(eq(visits.siteId, id))
 			.orderBy(desc(visits.dt)),
 		db
 			.select({
@@ -109,7 +109,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			.leftJoin(lutStationUnits, eq(stations.instUnitsId, lutStationUnits.id))
 			.leftJoin(lutStationReadType, eq(stations.stationTypeId, lutStationReadType.id))
 			.leftJoin(lutBoringMethod, eq(stations.borMethodId, lutBoringMethod.id))
-			.where(eq(stations.projectId, id))
+			.where(eq(stations.siteId, id))
 			.orderBy(stations.staName),
 		db.select().from(lutStationType).orderBy(lutStationType.type),
 		db.select().from(lutLocationType).orderBy(lutLocationType.locationType),
@@ -120,14 +120,14 @@ export const load: PageServerLoad = async ({ params }) => {
 		db.select().from(lutBoringMethod).orderBy(lutBoringMethod.boringMethod)
 	]);
 
-	if (rows.length === 0) error(404, 'Project not found');
+	if (rows.length === 0) error(404, 'Site not found');
 
 	return {
-		project: rows[0],
+		site: rows[0],
 		siteTypes,
 		counties,
-		visits: projectVisits,
-		stations: projectStations,
+		visits: siteVisits,
+		stations: siteStations,
 		stationTypes,
 		locationTypes,
 		scientists,
@@ -148,7 +148,7 @@ export const actions: Actions = {
 		const typeIdRaw = data.get('typeId') as string;
 		const countyRaw = data.get('county') as string;
 		await db
-			.update(projects)
+			.update(sites)
 			.set({
 				isgsNum: (data.get('isgsNum') as string) || null,
 				idotName,
@@ -160,19 +160,19 @@ export const actions: Actions = {
 				typeId: typeIdRaw ? parseInt(typeIdRaw) : null,
 				seqCode: (data.get('seqCode') as string) || null
 			})
-			.where(eq(projects.id, id));
+			.where(eq(sites.id, id));
 
-		redirect(303, `/projects/${id}`);
+		redirect(303, `/sites/${id}`);
 	},
 
 	delete: async ({ params }) => {
 		const id = parseInt(params.id);
-		await db.delete(projects).where(eq(projects.id, id));
+		await db.delete(sites).where(eq(sites.id, id));
 		redirect(303, '/');
 	},
 
 	saveStation: async ({ request, params }) => {
-		const projectId = parseInt(params.id);
+		const siteId = parseInt(params.id);
 		const data = await request.formData();
 
 		const staName = (data.get('staName') as string)?.trim();
@@ -191,7 +191,7 @@ export const actions: Actions = {
 		const lngRaw = (data.get('longitude') as string)?.trim();
 
 		const values = {
-			projectId,
+			siteId,
 			staName,
 			typeId: parseInt(typeIdRaw),
 			initials,
@@ -227,32 +227,32 @@ export const actions: Actions = {
 			await db.insert(stations).values(values);
 		}
 
-		redirect(303, `/projects/${projectId}`);
+		redirect(303, `/sites/${siteId}`);
 	},
 
 	deleteStation: async ({ request, params }) => {
-		const projectId = parseInt(params.id);
+		const siteId = parseInt(params.id);
 		const data = await request.formData();
 		const stationId = parseInt(data.get('stationId') as string);
 		if (!isNaN(stationId)) {
 			await db.delete(stations).where(eq(stations.id, stationId));
 		}
-		redirect(303, `/projects/${projectId}`);
+		redirect(303, `/sites/${siteId}`);
 	},
 
 	addVisit: async ({ request, params }) => {
-		const projectId = parseInt(params.id);
+		const siteId = parseInt(params.id);
 		const data = await request.formData();
 		const by = (data.get('by') as string)?.trim();
 		if (!by) return fail(400, { error: 'Field Scientist is required' });
 
 		await createVisitWithStations({
-			projectId,
+			siteId,
 			by,
 			dt: (data.get('dt') as string) || null,
 			note: (data.get('note') as string) || null
 		});
 
-		redirect(303, `/projects/${projectId}`);
+		redirect(303, `/sites/${siteId}`);
 	}
 };

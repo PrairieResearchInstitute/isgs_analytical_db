@@ -23,12 +23,8 @@
 		return name || initials || '—';
 	}
 
-	function projectLabel(p: {
-		id: number;
-		idotName: string | null;
-		isgsNum: string | null;
-	}): string {
-		return p.idotName ?? p.isgsNum ?? `Project ${p.id}`;
+	function siteLabel(p: { id: number; idotName: string | null; isgsNum: string | null }): string {
+		return p.idotName ?? p.isgsNum ?? `Site ${p.id}`;
 	}
 </script>
 
@@ -62,7 +58,7 @@
 			<TableHeader>
 				<tr>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
-					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Project</th>
+					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Site</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
 						>Field Scientist</th
 					>
@@ -77,7 +73,7 @@
 								{formatDate(visit.dt)}
 							</a>
 						</td>
-						<td class="px-4 py-3 text-il-storm-30">{visit.projectName ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm-30">{visit.siteName ?? '—'}</td>
 						<td class="px-4 py-3 text-il-storm">
 							{scientistLabel(visit.scientistFirst, visit.scientistLast, visit.by)}
 						</td>
@@ -97,10 +93,10 @@
 		use:enhance={closeOnSuccess(() => (dialogOpen = false))}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<SelectField id="projectId" name="projectId" label="Project" required>
-			<option value="">— Select project —</option>
-			{#each data.projects as p (p.id)}
-				<option value={p.id}>{projectLabel(p)}</option>
+		<SelectField id="siteId" name="siteId" label="Site" required>
+			<option value="">— Select site —</option>
+			{#each data.sites as p (p.id)}
+				<option value={p.id}>{siteLabel(p)}</option>
 			{/each}
 		</SelectField>
 

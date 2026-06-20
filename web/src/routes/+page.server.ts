@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { projects, lutSiteType, lutCountyNames, visits } from '$lib/server/schema';
+import { sites, lutSiteType, lutCountyNames, visits } from '$lib/server/schema';
 import { count, eq, or, isNull, gte } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -8,32 +8,32 @@ export const load: PageServerLoad = async () => {
 	const [rows, siteTypes, counties] = await Promise.all([
 		db
 			.select({
-				id: projects.id,
-				isgsNum: projects.isgsNum,
-				idotName: projects.idotName,
-				isgsName: projects.isgsName,
-				beginDt: projects.beginDt,
-				endDt: projects.endDt,
-				faNum: projects.faNum,
-				county: projects.county,
+				id: sites.id,
+				isgsNum: sites.isgsNum,
+				idotName: sites.idotName,
+				isgsName: sites.isgsName,
+				beginDt: sites.beginDt,
+				endDt: sites.endDt,
+				faNum: sites.faNum,
+				county: sites.county,
 				countyName: lutCountyNames.cntyname,
-				typeId: projects.typeId,
-				seqCode: projects.seqCode,
+				typeId: sites.typeId,
+				seqCode: sites.seqCode,
 				siteType: lutSiteType.siteType,
 				visitCount: count(visits.id)
 			})
-			.from(projects)
-			.leftJoin(lutSiteType, eq(projects.typeId, lutSiteType.id))
-			.leftJoin(lutCountyNames, eq(projects.county, lutCountyNames.cntycode))
-			.leftJoin(visits, eq(visits.projectId, projects.id))
-			.where(or(isNull(projects.endDt), gte(projects.endDt, new Date().toISOString().slice(0, 10))))
-			.groupBy(projects.id, lutCountyNames.cntyname, lutSiteType.siteType)
-			.orderBy(projects.isgsNum),
+			.from(sites)
+			.leftJoin(lutSiteType, eq(sites.typeId, lutSiteType.id))
+			.leftJoin(lutCountyNames, eq(sites.county, lutCountyNames.cntycode))
+			.leftJoin(visits, eq(visits.siteId, sites.id))
+			.where(or(isNull(sites.endDt), gte(sites.endDt, new Date().toISOString().slice(0, 10))))
+			.groupBy(sites.id, lutCountyNames.cntyname, lutSiteType.siteType)
+			.orderBy(sites.isgsNum),
 		db.select().from(lutSiteType).orderBy(lutSiteType.siteType),
 		db.select().from(lutCountyNames).orderBy(lutCountyNames.cntyname)
 	]);
 
-	return { projects: rows, siteTypes, counties };
+	return { sites: rows, siteTypes, counties };
 };
 
 export const actions: Actions = {
@@ -44,7 +44,7 @@ export const actions: Actions = {
 
 		const typeIdRaw = data.get('typeId') as string;
 		const countyRaw = data.get('county') as string;
-		await db.insert(projects).values({
+		await db.insert(sites).values({
 			isgsNum: (data.get('isgsNum') as string) || null,
 			idotName,
 			isgsName: (data.get('isgsName') as string) || null,
@@ -68,7 +68,7 @@ export const actions: Actions = {
 		const typeIdRaw = data.get('typeId') as string;
 		const countyRaw = data.get('county') as string;
 		await db
-			.update(projects)
+			.update(sites)
 			.set({
 				isgsNum: (data.get('isgsNum') as string) || null,
 				idotName,
@@ -80,7 +80,7 @@ export const actions: Actions = {
 				typeId: typeIdRaw ? parseInt(typeIdRaw) : null,
 				seqCode: (data.get('seqCode') as string) || null
 			})
-			.where(eq(projects.id, id));
+			.where(eq(sites.id, id));
 
 		redirect(303, '/');
 	},
@@ -88,7 +88,7 @@ export const actions: Actions = {
 	delete: async ({ request }) => {
 		const data = await request.formData();
 		const id = parseInt(data.get('id') as string);
-		await db.delete(projects).where(eq(projects.id, id));
+		await db.delete(sites).where(eq(sites.id, id));
 		redirect(303, '/');
 	}
 };

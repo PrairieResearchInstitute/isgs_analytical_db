@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { lutcInitials, visits, projects } from '$lib/server/schema';
+import { lutcInitials, visits, sites } from '$lib/server/schema';
 import { eq } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -17,12 +17,12 @@ export const load: PageServerLoad = async ({ params }) => {
 		.select({
 			id: visits.id,
 			dt: visits.dt,
-			projectId: visits.projectId,
-			idotName: projects.idotName,
+			siteId: visits.siteId,
+			idotName: sites.idotName,
 			note: visits.note
 		})
 		.from(visits)
-		.leftJoin(projects, eq(visits.projectId, projects.id))
+		.leftJoin(sites, eq(visits.siteId, sites.id))
 		.where(eq(visits.by, params.initials))
 		.orderBy(visits.dt);
 
