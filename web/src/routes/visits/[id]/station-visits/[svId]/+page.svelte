@@ -37,13 +37,16 @@
 
 	let sampleDialogOpen = $state(false);
 
+	// Groundwater stations record level in meters; all others in feet. The form shows a single
+	// Level input bound to the matching column with a dynamic unit label.
+	let isGW = $derived(data.stationVisit.shortType === 'GW');
+	let activeLevel = $derived(isGW ? data.stationVisit.levelMeters : data.stationVisit.levelFeet);
+
 	// Status is required only when Level is blank. `levelEdited` starts null and the derived
 	// falls back to the loaded value so an existing record with a level isn't flagged on load.
 	let levelEdited = $state<string | null>(null);
 	let statusRequired = $derived(
-		(
-			levelEdited ?? (data.stationVisit.level != null ? String(data.stationVisit.level) : '')
-		).trim() === ''
+		(levelEdited ?? (activeLevel != null ? String(activeLevel) : '')).trim() === ''
 	);
 
 	function calcStats(vals: number[]) {
@@ -292,10 +295,10 @@
 		<TextField
 			id="sv-level"
 			name="level"
-			label="Level"
+			label={isGW ? 'Level (m)' : 'Level (ft)'}
 			type="number"
 			step="any"
-			value={data.stationVisit.level ?? ''}
+			value={activeLevel ?? ''}
 			oninput={(e: Event) => (levelEdited = (e.currentTarget as HTMLInputElement).value)}
 			inputClass="max-w-xs"
 		/>

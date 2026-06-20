@@ -3,6 +3,7 @@ import {
 	visits,
 	stations,
 	stationVisits,
+	lutStationType,
 	lutStatus,
 	stationVisitImportQueue,
 	pressureTemperatureDepth,
@@ -28,13 +29,16 @@ export const load: PageServerLoad = async ({ params }) => {
 				staName: stations.staName,
 				code: stations.code,
 				time: stationVisits.time,
-				level: stationVisits.level,
+				levelMeters: stationVisits.levelMeters,
+				levelFeet: stationVisits.levelFeet,
+				shortType: lutStationType.shortType,
 				statusId: stationVisits.statusId,
 				status: lutStatus.status,
 				notes: stationVisits.notes
 			})
 			.from(stationVisits)
 			.leftJoin(stations, eq(stationVisits.stationId, stations.id))
+			.leftJoin(lutStationType, eq(stations.typeId, lutStationType.id))
 			.leftJoin(lutStatus, eq(stationVisits.statusId, lutStatus.id))
 			.where(eq(stationVisits.id, svId))
 			.limit(1),
@@ -90,6 +94,17 @@ export const actions: Actions = {
 		const levelRaw = (data.get('level') as string)?.trim();
 		const statusIdRaw = data.get('statusId') as string;
 
+		// Determine the target level column from the station's type, server-side.
+		const stationTypeRows = await db
+			.select({ shortType: lutStationType.shortType })
+			.from(stationVisits)
+			.leftJoin(stations, eq(stationVisits.stationId, stations.id))
+			.leftJoin(lutStationType, eq(stations.typeId, lutStationType.id))
+			.where(eq(stationVisits.id, svId))
+			.limit(1);
+		const isGW = stationTypeRows[0]?.shortType === 'GW';
+		const parsedLevel = levelRaw !== '' ? parseFloat(levelRaw) : null;
+
 		const files = data.getAll('files').filter((f): f is File => f instanceof File && f.size > 0);
 
 		if (files.length > 0) {
@@ -115,7 +130,9 @@ export const actions: Actions = {
 			.update(stationVisits)
 			.set({
 				time: (data.get('time') as string) || null,
-				level: levelRaw !== '' ? parseFloat(levelRaw) : null,
+				// numeric columns are passed as strings to postgres.js to preserve exact decimals.
+				levelMeters: isGW ? (parsedLevel != null ? parsedLevel.toFixed(3) : null) : undefined,
+				levelFeet: !isGW ? (parsedLevel != null ? parsedLevel.toFixed(2) : null) : undefined,
 				statusId: statusIdRaw ? parseInt(statusIdRaw) : null,
 				notes: (data.get('notes') as string) || null
 			})

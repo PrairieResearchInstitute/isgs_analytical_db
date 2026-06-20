@@ -216,7 +216,13 @@
 								</td>
 								<td class="px-4 py-3 font-mono text-il-storm">{sv.code ?? '—'}</td>
 								<td class="px-4 py-3 text-il-storm">{sv.time ?? '—'}</td>
-								<td class="px-4 py-3 text-il-storm">{sv.level ?? '—'}</td>
+								<td class="px-4 py-3 text-il-storm">
+									{#if sv.shortType === 'GW'}
+										{sv.levelMeters != null ? `${sv.levelMeters} m` : '—'}
+									{:else}
+										{sv.levelFeet != null ? `${sv.levelFeet} ft` : '—'}
+									{/if}
+								</td>
 								<td class="px-4 py-3 text-il-storm">{sv.status ?? '—'}</td>
 								<td class="px-4 py-3 text-il-storm">{sv.notes ?? '—'}</td>
 							</tr>

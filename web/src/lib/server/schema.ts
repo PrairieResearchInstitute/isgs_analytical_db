@@ -3,6 +3,7 @@ import {
 	integer,
 	text,
 	doublePrecision,
+	numeric,
 	serial,
 	real,
 	time,
@@ -152,7 +153,8 @@ export const stationVisits = pgTable('station_visits', {
 		.notNull()
 		.references(() => stations.id),
 	statusId: integer('status_id').references(() => lutStatus.id),
-	level: real('level'),
+	levelMeters: numeric('level_meters', { precision: 10, scale: 3 }),
+	levelFeet: numeric('level_feet', { precision: 10, scale: 2 }),
 	time: time('time'),
 	notes: text('notes')
 });

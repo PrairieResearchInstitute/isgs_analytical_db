@@ -5,6 +5,7 @@ import {
 	lutcInitials,
 	stations,
 	stationVisits,
+	lutStationType,
 	lutStatus
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
@@ -41,13 +42,16 @@ export const load: PageServerLoad = async ({ params }) => {
 				staName: stations.staName,
 				code: stations.code,
 				time: stationVisits.time,
-				level: stationVisits.level,
+				levelMeters: stationVisits.levelMeters,
+				levelFeet: stationVisits.levelFeet,
+				shortType: lutStationType.shortType,
 				statusId: stationVisits.statusId,
 				status: lutStatus.status,
 				notes: stationVisits.notes
 			})
 			.from(stationVisits)
 			.leftJoin(stations, eq(stationVisits.stationId, stations.id))
+			.leftJoin(lutStationType, eq(stations.typeId, lutStationType.id))
 			.leftJoin(lutStatus, eq(stationVisits.statusId, lutStatus.id))
 			.where(eq(stationVisits.visitId, id))
 			.orderBy(asc(stations.staName)),

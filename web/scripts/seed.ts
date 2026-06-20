@@ -294,13 +294,25 @@ async function main() {
 		StatusID?: number;
 	};
 	const soReadRows = parseNdjson<RawSoRead>(`${dataDir}/SO_Read.json`);
-	const soReadValues = soReadRows.map((r) => ({
-		visitId: r.VisitID,
-		stationId: r.StationID,
-		level: r.Level ?? null,
-		notes: r.Note ?? null,
-		statusId: r.StatusID ?? null
-	}));
+
+	// Groundwater (GW) stations record level in meters; all others in feet. Route each source
+	// Level into the matching column based on the station's type.
+	const shortTypeByTypeId = new Map(stationTypeRows.map((r) => [r.ID, r.ShortType ?? null]));
+	const shortTypeByStationId = new Map(
+		stationRows.map((r) => [r.ID, shortTypeByTypeId.get(r.TypeID) ?? null])
+	);
+	const soReadValues = soReadRows.map((r) => {
+		const isGW = shortTypeByStationId.get(r.StationID) === 'GW';
+		const level = r.Level ?? null;
+		return {
+			visitId: r.VisitID,
+			stationId: r.StationID,
+			levelMeters: isGW && level != null ? level.toFixed(3) : null,
+			levelFeet: !isGW && level != null ? level.toFixed(2) : null,
+			notes: r.Note ?? null,
+			statusId: r.StatusID ?? null
+		};
+	});
 	for (const chunk of chunkArray(soReadValues, 50)) {
 		await db.insert(schema.stationVisits).values(chunk).onConflictDoNothing();
 	}
