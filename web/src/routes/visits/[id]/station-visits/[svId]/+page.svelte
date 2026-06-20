@@ -37,6 +37,15 @@
 
 	let sampleDialogOpen = $state(false);
 
+	// Status is required only when Level is blank. `levelEdited` starts null and the derived
+	// falls back to the loaded value so an existing record with a level isn't flagged on load.
+	let levelEdited = $state<string | null>(null);
+	let statusRequired = $derived(
+		(
+			levelEdited ?? (data.stationVisit.level != null ? String(data.stationVisit.level) : '')
+		).trim() === ''
+	);
+
 	function calcStats(vals: number[]) {
 		if (!vals.length) return null;
 		const min = Math.min(...vals);
@@ -275,6 +284,8 @@
 			name="time"
 			label="Time"
 			type="time"
+			lang="en-GB"
+			required
 			value={data.stationVisit.time ?? ''}
 			inputClass="max-w-xs"
 		/>
@@ -285,6 +296,7 @@
 			type="number"
 			step="any"
 			value={data.stationVisit.level ?? ''}
+			oninput={(e: Event) => (levelEdited = (e.currentTarget as HTMLInputElement).value)}
 			inputClass="max-w-xs"
 		/>
 
@@ -292,6 +304,7 @@
 			id="sv-status"
 			name="statusId"
 			label="Status"
+			required={statusRequired}
 			value={data.stationVisit.statusId ?? ''}
 			inputClass="max-w-xs"
 		>
