@@ -3,6 +3,11 @@ node_modules
 build
 dist
 
+# Local SQLite dev database
+dev.db
+dev.db-shm
+dev.db-wal
+
 # Environment
 .env
 .env.*
