@@ -72,13 +72,13 @@ async function main() {
 	};
 	const projectRows = parseNdjson<RawProject>(`${dataDir}/Projects.json`);
 	await db
-		.insert(schema.projects)
+		.insert(schema.sites)
 		.values(
 			projectRows.map((r) => ({
 				id: r.ID,
 				isgsNum: r.ISGS_Num ?? null,
 				idotName: r.IDOT_Name ?? null,
-				isgsName: r.ISGS_Name ?? null,
+				isgsName: r.ISGS_Name ?? r.IDOT_Name ?? `Site ${r.ID}`,
 				beginDt: parseDate(r.BeginDT),
 				endDt: parseDate(r.EndDT),
 				faNum: r.FA_num ?? null,
@@ -88,7 +88,7 @@ async function main() {
 			}))
 		)
 		.onConflictDoNothing();
-	console.log(`Seeded ${projectRows.length} projects`);
+	console.log(`Seeded ${projectRows.length} sites`);
 
 	// Seed LUTC_Initials
 	type RawInitials = { Initials: string; FirstName?: string; LastName?: string };
@@ -130,7 +130,7 @@ async function main() {
 		.values(
 			visitRows.map((r) => ({
 				id: r.ID,
-				projectId: r.ProjectID,
+				siteId: r.ProjectID,
 				dt: parseDate(r.DT),
 				by: r.By,
 				note: r.Note ?? null,
@@ -261,7 +261,7 @@ async function main() {
 	const stationRows = parseNdjson<RawStation>(`${dataDir}/Stations.json`);
 	const stationValues = stationRows.map((r) => ({
 		id: r.ID,
-		projectId: r.ProjectID,
+		siteId: r.ProjectID,
 		typeId: r.TypeID,
 		code: r.Code ?? null,
 		beginDt: parseDate(r.BeginDT),
@@ -307,10 +307,9 @@ async function main() {
 	console.log(`Seeded ${soReadRows.length} station visits`);
 
 	// Sync sequences so subsequent inserts get correct auto-incremented IDs
-	await db.execute(sql`SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects))`);
+	await db.execute(sql`SELECT setval('sites_id_seq', (SELECT MAX(id) FROM sites))`);
 	await db.execute(sql`SELECT setval('visits_id_seq', (SELECT MAX(id) FROM visits))`);
 	await db.execute(sql`SELECT setval('stations_id_seq', (SELECT MAX(id) FROM stations))`);
-	await db.execute(sql`SELECT setval('sites_id_seq', COALESCE((SELECT MAX(id) FROM sites), 1))`);
 	await db.execute(
 		sql`SELECT setval('station_visits_id_seq', COALESCE((SELECT MAX(id) FROM station_visits), 1))`
 	);

@@ -24,8 +24,8 @@
 		return name || initials || '—';
 	}
 
-	function siteLabel(p: { id: number; idotName: string | null; isgsNum: string | null }): string {
-		return p.idotName ?? p.isgsNum ?? `Site ${p.id}`;
+	function siteLabel(p: { id: number; isgsName: string | null; isgsNum: string | null }): string {
+		return p.isgsName ?? p.isgsNum ?? `Site ${p.id}`;
 	}
 </script>
 

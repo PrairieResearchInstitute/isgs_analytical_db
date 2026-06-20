@@ -97,19 +97,19 @@
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
 						<button
 							type="button"
-							onclick={() => toggleSort('idotName')}
+							onclick={() => toggleSort('isgsName')}
 							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
 						>
-							IDOT Name <span class="text-xs opacity-70">{sortIcon('idotName')}</span>
+							ISGS Name <span class="text-xs opacity-70">{sortIcon('isgsName')}</span>
 						</button>
 					</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
 						<button
 							type="button"
-							onclick={() => toggleSort('isgsName')}
+							onclick={() => toggleSort('idotName')}
 							class="flex items-center gap-1 hover:opacity-75 transition-opacity"
 						>
-							ISGS Name <span class="text-xs opacity-70">{sortIcon('isgsName')}</span>
+							IDOT Name <span class="text-xs opacity-70">{sortIcon('idotName')}</span>
 						</button>
 					</th>
 					<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">
@@ -165,10 +165,10 @@
 						<td class="px-4 py-3 font-mono text-il-storm-30">{site.isgsNum ?? '—'}</td>
 						<td class="px-4 py-3 font-semibold">
 							<a href="/sites/{site.id}" class="text-il-blue hover:underline">
-								{site.idotName ?? '—'}
+								{site.isgsName ?? '—'}
 							</a>
 						</td>
-						<td class="px-4 py-3 text-il-storm-30">{site.isgsName ?? '—'}</td>
+						<td class="px-4 py-3 text-il-storm-30">{site.idotName ?? '—'}</td>
 						<td class="px-4 py-3 text-il-storm">{site.countyName ?? '—'}</td>
 						<td class="px-4 py-3 text-il-storm">{site.siteType ?? '—'}</td>
 						<td class="px-4 py-3 text-il-storm">{formatDate(site.beginDt)}</td>
@@ -191,7 +191,7 @@
 	>
 		<TextField id="isgsNum" name="isgsNum" label="ISGS #" />
 		<TextField id="idotName" name="idotName" label="IDOT Name" required />
-		<TextField id="isgsName" name="isgsName" label="ISGS Name" />
+		<TextField id="isgsName" name="isgsName" label="ISGS Name" required />
 		<TextField id="faNum" name="faNum" label="FA #" />
 		<TextField id="beginDt" name="beginDt" label="Begin Date" type="date" />
 		<TextField id="endDt" name="endDt" label="End Date" type="date" />

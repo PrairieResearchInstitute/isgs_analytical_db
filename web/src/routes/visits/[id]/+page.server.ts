@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				id: visits.id,
 				dt: visits.dt,
 				siteId: visits.siteId,
-				siteName: sites.idotName,
+				siteName: sites.isgsName,
 				by: visits.by,
 				scientistFirst: lutcInitials.firstName,
 				scientistLast: lutcInitials.lastName,
@@ -52,9 +52,9 @@ export const load: PageServerLoad = async ({ params }) => {
 			.where(eq(stationVisits.visitId, id))
 			.orderBy(asc(stations.staName)),
 		db
-			.select({ id: sites.id, idotName: sites.idotName, isgsNum: sites.isgsNum })
+			.select({ id: sites.id, isgsName: sites.isgsName, isgsNum: sites.isgsNum })
 			.from(sites)
-			.orderBy(asc(sites.idotName)),
+			.orderBy(asc(sites.isgsName)),
 		db.select().from(lutcInitials).orderBy(asc(lutcInitials.lastName), asc(lutcInitials.firstName))
 	]);
 

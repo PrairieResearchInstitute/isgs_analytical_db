@@ -63,7 +63,7 @@
 				<TableHeader>
 					<tr>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Date</th>
-						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">IDOT Name</th>
+						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">ISGS Name</th>
 						<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide">Note</th>
 					</tr>
 				</TableHeader>
@@ -75,7 +75,7 @@
 							<td class="px-4 py-3 text-il-storm">{formatDate(visit.dt)}</td>
 							<td class="px-4 py-3 font-semibold">
 								<a href="/sites/{visit.siteId}" class="text-il-blue hover:underline">
-									{visit.idotName ?? '—'}
+									{visit.isgsName ?? '—'}
 								</a>
 							</td>
 							<td class="px-4 py-3 text-il-storm-30">{visit.note ?? '—'}</td>

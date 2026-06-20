@@ -29,7 +29,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.site.idotName ?? 'Site'} | IDOT Wetlands Data</title>
+	<title>{data.site.isgsName ?? 'Site'} | IDOT Wetlands Data</title>
 </svelte:head>
 
 <!-- Top bar -->
@@ -46,7 +46,7 @@
 <!-- Site detail card -->
 <div class="border border-il-cloud rounded-lg shadow-sm bg-white overflow-hidden">
 	<div class="px-6 py-4 bg-il-storm-95 border-b border-il-cloud">
-		<h1 class="font-heading font-bold text-2xl text-il-blue">{data.site.idotName ?? '—'}</h1>
+		<h1 class="font-heading font-bold text-2xl text-il-blue">{data.site.isgsName ?? '—'}</h1>
 	</div>
 
 	<dl class="grid grid-cols-2 gap-x-8 gap-y-5 px-6 py-5 font-sans">
@@ -55,8 +55,8 @@
 			<dd class="font-mono text-il-storm-30">{data.site.isgsNum ?? '—'}</dd>
 		</div>
 		<div>
-			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">ISGS Name</dt>
-			<dd class="text-il-storm-30">{data.site.isgsName ?? '—'}</dd>
+			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">IDOT Name</dt>
+			<dd class="text-il-storm-30">{data.site.idotName ?? '—'}</dd>
 		</div>
 		<div>
 			<dt class="text-xs font-semibold text-il-storm uppercase tracking-wide mb-1">FA #</dt>
@@ -213,7 +213,13 @@
 			required
 			value={data.site.idotName ?? ''}
 		/>
-		<TextField id="isgsName" name="isgsName" label="ISGS Name" value={data.site.isgsName ?? ''} />
+		<TextField
+			id="isgsName"
+			name="isgsName"
+			label="ISGS Name"
+			required
+			value={data.site.isgsName ?? ''}
+		/>
 		<TextField id="faNum" name="faNum" label="FA #" value={data.site.faNum ?? ''} />
 		<TextField
 			id="beginDt"
