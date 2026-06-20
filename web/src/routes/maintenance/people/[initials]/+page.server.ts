@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			id: visits.id,
 			dt: visits.dt,
 			siteId: visits.siteId,
-			idotName: sites.idotName,
+			isgsName: sites.isgsName,
 			note: visits.note
 		})
 		.from(visits)

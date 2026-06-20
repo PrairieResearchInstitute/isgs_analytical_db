@@ -26,7 +26,7 @@ export const sites = pgTable('sites', {
 	id: serial('id').primaryKey(),
 	isgsNum: text('isgs_num'),
 	idotName: text('idot_name'),
-	isgsName: text('isgs_name'),
+	isgsName: text('isgs_name').notNull(),
 	beginDt: text('begin_dt'),
 	endDt: text('end_dt'),
 	faNum: text('fa_num'),

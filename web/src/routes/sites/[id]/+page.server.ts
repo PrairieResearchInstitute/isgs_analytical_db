@@ -144,6 +144,8 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const idotName = (data.get('idotName') as string)?.trim();
 		if (!idotName) return fail(400, { error: 'IDOT Name is required' });
+		const isgsName = (data.get('isgsName') as string)?.trim();
+		if (!isgsName) return fail(400, { error: 'ISGS Name is required' });
 
 		const typeIdRaw = data.get('typeId') as string;
 		const countyRaw = data.get('county') as string;
@@ -152,7 +154,7 @@ export const actions: Actions = {
 			.set({
 				isgsNum: (data.get('isgsNum') as string) || null,
 				idotName,
-				isgsName: (data.get('isgsName') as string) || null,
+				isgsName,
 				beginDt: (data.get('beginDt') as string) || null,
 				endDt: (data.get('endDt') as string) || null,
 				faNum: (data.get('faNum') as string) || null,
