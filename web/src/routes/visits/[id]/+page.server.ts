@@ -6,7 +6,8 @@ import {
 	stations,
 	stationVisits,
 	lutStationType,
-	lutStatus
+	lutStatus,
+	samples
 } from '$lib/server/schema';
 import { eq, asc } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
@@ -16,7 +17,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id);
 	if (isNaN(id)) throw error(404, 'Visit not found');
 
-	const [rows, svRows, allSites, scientists] = await Promise.all([
+	const [rows, svRows, allSites, scientists, bottles] = await Promise.all([
 		db
 			.select({
 				id: visits.id,
@@ -59,7 +60,19 @@ export const load: PageServerLoad = async ({ params }) => {
 			.select({ id: sites.id, isgsName: sites.isgsName, isgsNum: sites.isgsNum })
 			.from(sites)
 			.orderBy(asc(sites.isgsName)),
-		db.select().from(lutcInitials).orderBy(asc(lutcInitials.lastName), asc(lutcInitials.firstName))
+		db.select().from(lutcInitials).orderBy(asc(lutcInitials.lastName), asc(lutcInitials.firstName)),
+		db
+			.select({
+				id: samples.id,
+				sampleName: samples.sampleName,
+				stationVisitId: samples.stationVisitId,
+				staName: stations.staName
+			})
+			.from(samples)
+			.leftJoin(stationVisits, eq(samples.stationVisitId, stationVisits.id))
+			.leftJoin(stations, eq(stationVisits.stationId, stations.id))
+			.where(eq(samples.visitId, id))
+			.orderBy(asc(samples.sampleName))
 	]);
 
 	if (rows.length === 0) throw error(404, 'Visit not found');
@@ -68,7 +81,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		visit: rows[0],
 		stationVisits: svRows,
 		sites: allSites,
-		scientists
+		scientists,
+		bottles
 	};
 };
 
@@ -96,6 +110,36 @@ export const actions: Actions = {
 				note: (data.get('note') as string) || null
 			})
 			.where(eq(visits.id, id));
+
+		return { success: true };
+	},
+
+	allocateBottles: async ({ params, request }) => {
+		const id = parseInt(params.id);
+		if (isNaN(id)) return fail(400, { error: 'Invalid visit id' });
+
+		const data = await request.formData();
+		const shortCode = (data.get('shortCode') as string)?.trim();
+		const startNumber = parseInt(data.get('startNumber') as string);
+		const count = parseInt(data.get('count') as string);
+
+		if (!shortCode) return fail(400, { error: 'Site short code is required' });
+		if (isNaN(startNumber) || startNumber < 0)
+			return fail(400, { error: 'Starting bottle number must be 0 or greater' });
+		if (isNaN(count) || count < 1) return fail(400, { error: 'Count must be at least 1' });
+		if (count > 500) return fail(400, { error: 'Cannot allocate more than 500 bottles at once' });
+
+		const rows = [];
+		for (let n = startNumber; n < startNumber + count; n++) {
+			const sampleName = `${shortCode}_${String(n).padStart(3, '0')}`;
+			if (sampleName.length > 32)
+				return fail(400, {
+					error: 'Sample names exceed 32 characters — use a shorter short code'
+				});
+			rows.push({ visitId: id, stationVisitId: null, sampleName });
+		}
+
+		await db.insert(samples).values(rows);
 
 		return { success: true };
 	}

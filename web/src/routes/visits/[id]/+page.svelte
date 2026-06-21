@@ -13,6 +13,7 @@
 	let { data }: { data: PageData } = $props();
 
 	let editDialogOpen = $state(false);
+	let allocateDialogOpen = $state(false);
 
 	function scientistLabel(
 		first: string | null,
@@ -51,9 +52,18 @@
 			<p class="mt-1 text-sm font-sans text-il-storm">{data.visit.dt}</p>
 		{/if}
 	</div>
-	<Button onclick={() => (editDialogOpen = true)} class="inline-flex items-center gap-2">
-		Edit Visit
-	</Button>
+	<div class="flex items-center gap-3">
+		<Button
+			variant="secondary"
+			onclick={() => (allocateDialogOpen = true)}
+			class="inline-flex items-center gap-2"
+		>
+			Allocate Bottles
+		</Button>
+		<Button onclick={() => (editDialogOpen = true)} class="inline-flex items-center gap-2">
+			Edit Visit
+		</Button>
+	</div>
 </div>
 
 <!-- Detail card -->
@@ -182,6 +192,32 @@
 	</form>
 </AppDialog>
 
+<!-- Allocate bottles dialog -->
+<AppDialog bind:open={allocateDialogOpen} title="Allocate Bottles">
+	<form
+		method="POST"
+		action="?/allocateBottles"
+		use:enhance={closeOnSuccess(() => (allocateDialogOpen = false))}
+		class="px-6 py-5 flex flex-col gap-4"
+	>
+		<TextField id="allocate-shortCode" name="shortCode" label="Site Short Code" required />
+		<TextField
+			id="allocate-startNumber"
+			name="startNumber"
+			label="Starting Bottle Number"
+			type="number"
+			required
+		/>
+		<TextField id="allocate-count" name="count" label="Count" type="number" required />
+
+		<!-- Form actions -->
+		<div class="flex items-center justify-end gap-3 pt-2 border-t border-il-cloud mt-1">
+			<Button variant="secondary" onclick={() => (allocateDialogOpen = false)}>Cancel</Button>
+			<Button type="submit" class="px-5">Allocate</Button>
+		</div>
+	</form>
+</AppDialog>
+
 <!-- Station Visits section -->
 <div class="mt-8">
 	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Station Visits</h2>
@@ -225,6 +261,62 @@
 								</td>
 								<td class="px-4 py-3 text-il-storm">{sv.status ?? '—'}</td>
 								<td class="px-4 py-3 text-il-storm">{sv.notes ?? '—'}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{/if}
+</div>
+
+<!-- Bottles section -->
+<div class="mt-8">
+	<h2 class="font-heading font-bold text-xl text-il-blue mb-4">Bottles</h2>
+	{#if data.bottles.length === 0}
+		<div class="border-2 border-il-cloud rounded p-10 text-center text-il-storm font-sans">
+			No bottles allocated to this visit.
+		</div>
+	{:else}
+		<div class="border border-il-cloud rounded overflow-hidden shadow-sm">
+			<div class="overflow-y-auto max-h-[440px]">
+				<table class="w-full text-sm font-sans">
+					<TableHeader sticky>
+						<tr>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
+								>Sample Name</th
+							>
+							<th class="text-left px-4 py-3 font-heading font-semibold tracking-wide"
+								>Assigned Station</th
+							>
+						</tr>
+					</TableHeader>
+					<tbody>
+						{#each data.bottles as bottle (bottle.id)}
+							<tr
+								class="border-b border-il-cloud last:border-0 hover:bg-il-storm-95 transition-colors"
+							>
+								<td class="px-4 py-3 font-mono font-semibold">
+									{#if bottle.stationVisitId}
+										<a
+											href="/visits/{data.visit
+												.id}/station-visits/{bottle.stationVisitId}/samples/{bottle.id}"
+											class="text-il-blue hover:underline">{bottle.sampleName ?? '—'}</a
+										>
+									{:else}
+										<span class="text-il-storm-30">{bottle.sampleName ?? '—'}</span>
+									{/if}
+								</td>
+								<td class="px-4 py-3 text-il-storm">
+									{#if bottle.stationVisitId}
+										<a
+											href="/visits/{data.visit.id}/station-visits/{bottle.stationVisitId}"
+											class="text-il-blue hover:underline">{bottle.staName ?? '—'}</a
+										>
+									{:else}
+										<span class="text-il-storm">Unassigned</span>
+									{/if}
+								</td>
 							</tr>
 						{/each}
 					</tbody>

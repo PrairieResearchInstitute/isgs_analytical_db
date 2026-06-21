@@ -220,9 +220,10 @@ export type NewStationVisitImportQueueEntry = typeof stationVisitImportQueue.$in
 
 export const samples = pgTable('samples', {
 	id: serial('id').primaryKey(),
-	stationVisitId: integer('station_visit_id')
+	visitId: integer('visit_id')
 		.notNull()
-		.references(() => stationVisits.id),
+		.references(() => visits.id),
+	stationVisitId: integer('station_visit_id').references(() => stationVisits.id),
 	sampleName: varchar('sample_name', { length: 32 }),
 	notes: text('notes'),
 	pumpType: text('pump_type'),

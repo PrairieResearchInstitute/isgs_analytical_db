@@ -582,12 +582,23 @@
 		use:enhance={closeOnSuccess(() => (sampleDialogOpen = false))}
 		class="px-6 py-5 flex flex-col gap-4"
 	>
-		<TextField id="sampleName" name="sampleName" label="Sample Name" maxlength="32" />
-		<TextareaField id="sampleNotes" name="notes" label="Notes" inputClass="resize-y" />
+		{#if data.availableBottles.length === 0}
+			<p class="text-sm font-sans text-il-storm">
+				No unassigned bottles remain for this visit. Allocate more bottles from the visit page.
+			</p>
+		{:else}
+			<SelectField id="sampleId" name="sampleId" label="Bottle" required>
+				<option value="">— Select bottle —</option>
+				{#each data.availableBottles as b (b.id)}
+					<option value={b.id}>{b.sampleName}</option>
+				{/each}
+			</SelectField>
+			<TextareaField id="sampleNotes" name="notes" label="Notes" inputClass="resize-y" />
+		{/if}
 
 		<div class="flex items-center justify-between pt-2">
 			<Button variant="secondary" onclick={() => (sampleDialogOpen = false)}>Cancel</Button>
-			<Button type="submit" class="px-5">Save</Button>
+			<Button type="submit" class="px-5" disabled={data.availableBottles.length === 0}>Save</Button>
 		</div>
 	</form>
 </AppDialog>
